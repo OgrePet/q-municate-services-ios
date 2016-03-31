@@ -35,7 +35,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 
 - (void)dealloc {
 	
-	NSLog(@"%@ - %@",  NSStringFromSelector(_cmd), self);
+//	NSLog(@"%@ - %@",  NSStringFromSelector(_cmd), self);
 	
 	[self.presenceTimer invalidate];
 	[QBChat.instance removeDelegate:self];
