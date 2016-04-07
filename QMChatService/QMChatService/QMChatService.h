@@ -199,6 +199,13 @@ typedef void(^QMCacheCollection)(NSArray *collection);
                 completion:(void(^)(QBResponse *response))completion;
 
 /**
+ *  Deleting dialog from cache and memory storage.
+ *
+ *  @param dialogId Dialog ID
+ */
+- (void)deleteDialogWithIDLocally:(NSString *)dialogId;
+
+/**
  *  Loads dialogs specific to user from disc cache and puth them in memory storage. 
  *  @warning This method MUST be called after the login.
  *

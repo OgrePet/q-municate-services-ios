@@ -858,6 +858,15 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
     }];
 }
 
+- (void)deleteDialogWithIDLocally:(NSString *)dialogId {
+    [self.dialogsMemoryStorage deleteChatDialogWithID: dialogId];
+    [self.messagesMemoryStorage deleteMessagesWithDialogID: dialogId];
+    
+    if ([self.multicastDelegate respondsToSelector:@selector(chatService:didDeleteChatDialogWithIDFromMemoryStorage:)]) {
+        [self.multicastDelegate chatService: self didDeleteChatDialogWithIDFromMemoryStorage:dialogId];
+    }
+}
+
 #pragma mark - Messages histroy
 
 - (void)deleteMessageLocally:(QBChatMessage *)message {
