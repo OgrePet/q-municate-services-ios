@@ -186,7 +186,7 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
     
     // checking attachment in cache
     NSString *path = attachmentPath(attachment);
-    if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
+    if (!self.disableOnDiskCache && [[NSFileManager defaultManager] fileExistsAtPath:path]) {
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             
@@ -287,7 +287,42 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
     }
 }
 
+- (UIImage *)cachedImageForAttachmentMessage:(QBChatMessage*) attachmentMessage {
+    
+    if (attachmentMessage.attachmentStatus == QMMessageAttachmentStatusLoading || attachmentMessage.attachmentStatus == QMMessageAttachmentStatusError) {
+        return nil;
+    }
+    
+    QBChatAttachment *attachment = [attachmentMessage.attachments firstObject];
+    
+    // checking attachment in storage
+    if ([self.attachmentsStorage objectForKey:attachment.ID] != nil) {
+        return [self.attachmentsStorage objectForKey:attachment.ID];
+    }
+    
+    // checking attachment in cache
+    NSString *path = attachmentPath(attachment);
+    if (!self.disableOnDiskCache && [[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        NSError *error;
+        NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:&error];
+        
+        UIImage *image = [UIImage imageWithData:data];
+        
+        if (image != nil) {
+            [self.attachmentsStorage setObject:image forKey:attachment.ID];
+        }
+        
+        return image;
+    }
+
+    return nil;
+}
+
 - (BOOL)saveImageData:(NSData *)imageData chatAttachment:(QBChatAttachment *)attachment error:(NSError **)errorPtr {
+    
+    if (self.disableOnDiskCache) {
+        return YES;
+    }
     
     NSString *path = attachmentPath(attachment);
     

@@ -57,6 +57,12 @@
 @property (nonatomic, weak) id<QMChatAttachmentServiceDelegate> delegate;
 
 /**
+ *  Determines whether attachment service will cache images on disk or not.
+ *  Default value is NO.
+ */
+@property (nonatomic, assign) BOOL disableOnDiskCache;
+
+/**
  *  Send message with attachment to dialog
  *
  *  @param message      QBChatMessage instance
@@ -97,5 +103,16 @@
  *  @param completion             fetched image or error if failed
  */
 - (void)getImageForAttachmentMessage:(QBChatMessage *)attachmentMessage completion:(void(^)(NSError *error, UIImage *image))completion;
+
+/**
+ *  Get cached image by attachment message.
+ *
+ *  @param attachmentMessage      message with attachment
+ *  @param completion             fetched image or error if failed
+ *
+ *  @return Return cached UIImage nil if there is no cached image
+ 
+ */
+- (UIImage *)cachedImageForAttachmentMessage:(QBChatMessage*) attachmentMessage;
 
 @end
