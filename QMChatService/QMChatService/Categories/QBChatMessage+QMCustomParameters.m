@@ -20,6 +20,7 @@ NSString const *kQMCustomParameterChatMessageID = @"chat_message_id";
  *  Dialog keys
  */
 NSString const *kQMCustomParameterDialogID = @"dialog_id";
+NSString const *kQMCustomParameterDialogUserID = @"dialog_user_id";
 NSString const *kQMCustomParameterDialogRoomName = @"room_name";
 NSString const *kQMCustomParameterDialogRoomPhoto = @"room_photo";
 NSString const *kQMCustomParameterDialogRoomLastMessageDate = @"room_last_message_date";
@@ -87,6 +88,7 @@ NSString const *kQMCustomParameterDialogDeletedOccupantsIDs = @"deleted_occupant
         //Grap custom parameters;
         self.tDialog.name = self.context[kQMCustomParameterDialogRoomName];
         self.tDialog.photo = self.context[kQMCustomParameterDialogRoomPhoto];
+        self.tDialog.userID = [self.context[kQMCustomParameterDialogUserID] integerValue];
         
         NSString *updatedAtTimeInterval = self.context[kQMCustomParameterDialogRoomUpdatedDate];
         
@@ -134,6 +136,7 @@ NSString const *kQMCustomParameterDialogDeletedOccupantsIDs = @"deleted_occupant
     
     self.context[kQMCustomParameterDialogID] = dialog.ID;
     self.context[kQMCustomParameterDialogType] = @(dialog.type);
+    self.context[kQMCustomParameterDialogUserID] = @(dialog.userID);
     
     if (dialog.lastMessageDate != nil){
         NSNumber *lastMessageDate = @((NSUInteger)[dialog.lastMessageDate timeIntervalSince1970]);
