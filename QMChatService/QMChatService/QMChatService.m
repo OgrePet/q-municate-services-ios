@@ -1214,8 +1214,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
     for (QBChatMessage *message in messages) {
         NSAssert([message.dialogID isEqualToString:dialogID], @"Message is from incorrect dialog.");
         
-        if (![message.readIDs containsObject:@([QBSession currentSession].currentUser.ID)])
-        {
+        if (![message.readIDs containsObject:@([QBSession currentSession].currentUser.ID)]) {
             message.markable = YES;
             
             if (chatDialogToUpdate.unreadMessagesCount > 0) {
@@ -1224,37 +1223,21 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
             
             __weak __typeof(self)weakSelf = self;
             dispatch_group_enter(readGroup);
-            
-            
             [[QBChat instance] readMessage:message completion:^(NSError *error) {
-                
-                __typeof(weakSelf)strongSelf = weakSelf;
-                QBResponsePage *page = [QBResponsePage responsePageWithLimit: strongSelf.chatMessagesPerPage];
-                
-                [QBRequest messagesWithDialogID: dialogID
-                                extendedRequest: @{@"_id" : message.ID}
-                                        forPage: page
-                                   successBlock:^(QBResponse *response, NSArray *messages, QBResponsePage *page) {
-                                       __typeof(weakSelf)strongSelf = weakSelf;
-                                       
-                                       NSLog(@"Message successfully read %@", message.text);
-                                       
-                                       // updating message in memory storage
-                                       [strongSelf.messagesMemoryStorage addMessage:message forDialogID:message.dialogID];
-                                       // calling multicast delegate
-                                       if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didUpdateMessage:forDialogID:)]) {
-                                           [strongSelf.multicastDelegate chatService:strongSelf didUpdateMessage:message forDialogID:dialogID];
-                                       }
-                                       dispatch_group_leave(readGroup);
-                                   } errorBlock:^(QBResponse *response) {
-                                       
-                                       NSLog(@"Failed to read message");
-                                       dispatch_group_leave(readGroup);
-                                   }];
+                //
+                if (error == nil) {
+                    __typeof(weakSelf)strongSelf = weakSelf;
+                    
+                    // updating message in memory storage
+                    [strongSelf.messagesMemoryStorage addMessage:message forDialogID:message.dialogID];
+                    // calling multicast delegate
+                    if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didUpdateMessage:forDialogID:)]) {
+                        [strongSelf.multicastDelegate chatService:strongSelf didUpdateMessage:message forDialogID:dialogID];
+                    }
+                }
+                dispatch_group_leave(readGroup);
             }];
-            
         }
-        
     }
     
     // updating dialog in cache
