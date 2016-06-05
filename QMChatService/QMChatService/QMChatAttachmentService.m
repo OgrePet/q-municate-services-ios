@@ -109,6 +109,17 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
             NSError *error;
             NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:&error];
             
+            if (self.dataCryptor) {
+                data = [self.dataCryptor decryptedDataFromData: data];
+                if (data == nil) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSFileManager defaultManager] removeItemAtPath: path error: nil];
+                        [self getImageForChatAttachment: attachment completion: nil];
+                    });
+                    return;
+                }
+            }
+            
             UIImage *image = [UIImage imageWithData:data];
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -192,6 +203,17 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
             
             NSError *error;
             NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:&error];
+            
+            if (self.dataCryptor) {
+                data = [self.dataCryptor decryptedDataFromData: data];
+                if (data == nil) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSFileManager defaultManager] removeItemAtPath: path error: nil];
+                        [self getImageForAttachmentMessage: attachmentMessage completion: completion];
+                    });
+                    return;
+                }
+            }
             
             UIImage *image = [UIImage imageWithData:data];
             
@@ -306,6 +328,14 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
         NSError *error;
         NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:&error];
         
+        if (self.dataCryptor) {
+            data = [self.dataCryptor decryptedDataFromData: data];
+            if (data == nil) {
+                [[NSFileManager defaultManager] removeItemAtPath: path error: nil];
+                return [self cachedImageForAttachmentMessage: attachmentMessage];
+            }
+        }
+        
         UIImage *image = [UIImage imageWithData:data];
         
         if (image != nil) {
@@ -326,7 +356,13 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
     
     NSString *path = attachmentPath(attachment);
     
-    return [imageData writeToFile:path options:NSDataWritingAtomic error:errorPtr];
+    NSData* dataToWrite = imageData;
+    
+    if (self.dataCryptor) {
+        dataToWrite = [self.dataCryptor encryptedDataFromData:dataToWrite];
+    }
+    
+    return [dataToWrite writeToFile:path options:NSDataWritingAtomic error:errorPtr];
 }
 
 - (void)changeMessageAttachmentStatus:(QMMessageAttachmentStatus)status forMessage:(QBChatMessage *)message {

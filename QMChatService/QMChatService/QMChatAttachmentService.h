@@ -12,6 +12,15 @@
 @class QMChatService;
 @class QMChatAttachmentService;
 
+@protocol QMChatAttachmentDataCryptor <NSObject>
+
+- (nullable NSData*) encryptedDataFromData: (NSData* _Nonnull) plainData;
+
+- (nullable NSData*) decryptedDataFromData: (NSData* _Nonnull) cryptedData;
+
+@end
+
+
 @protocol QMChatAttachmentServiceDelegate <NSObject>
 
 /**
@@ -61,6 +70,11 @@
  *  Default value is NO.
  */
 @property (nonatomic, assign) BOOL disableOnDiskCache;
+
+/**
+ *  Chat attachment data cryptor
+ */
+@property (nonatomic, assign) id<QMChatAttachmentDataCryptor> dataCryptor;
 
 /**
  *  Send message with attachment to dialog
