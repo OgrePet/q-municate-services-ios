@@ -8,6 +8,8 @@
 
 #import "QMDBStorage.h"
 
+static id<QMCDRecordStackFactory> stackFactory = nil;
+
 @interface QMDBStorage ()
 
 #define QM_LOGGING_ENABLED 1
@@ -20,6 +22,11 @@
 
 @implementation QMDBStorage
 
++ (void) registerQMCDRecordStackFactory: (id<QMCDRecordStackFactory>) newStackFactory
+{
+    stackFactory = newStackFactory;
+}
+
 - (instancetype)initWithStoreNamed:(NSString *)storeName model:(NSManagedObjectModel *)model queueLabel:(const char *)queueLabel {
     
     self = [self init];
@@ -27,7 +34,13 @@
         
         self.queue = dispatch_queue_create(queueLabel, DISPATCH_QUEUE_SERIAL);
         //Create Chat coredata stack
-		self.stack = [AutoMigratingQMCDRecordStack stackWithStoreNamed:storeName model:model];
+        
+        if (stackFactory) {
+            self.stack = [stackFactory createStackWithStoreName: storeName model: model];
+        }
+        else {
+            self.stack = [AutoMigratingQMCDRecordStack stackWithStoreNamed:storeName model:model];
+        }
 		[QMCDRecordStack setDefaultStack:self.stack];
     }
     

@@ -20,11 +20,19 @@
 
 #import "QMCDRecord.h"
 
+@protocol QMCDRecordStackFactory <NSObject>
+
+- (QMCDRecordStack*) createStackWithStoreName: (NSString*) storeName model: (NSManagedObjectModel*) model;
+
+@end
+
 @interface QMDBStorage : NSObject
 
 @property (strong, nonatomic, readonly) dispatch_queue_t queue;
 @property (strong, nonatomic, readonly) QMCDRecordStack *stack;
 
+
++ (void) registerQMCDRecordStackFactory: (id<QMCDRecordStackFactory>) stackFactory;
 
 - (instancetype)initWithStoreNamed:(NSString *)storeName
                              model:(NSManagedObjectModel *)model
