@@ -105,11 +105,8 @@
 	[self.authService logInWithUser:user completion:^(QBResponse *response, QBUUser *userProfile) {
 		if (response.error != nil) {
             
-            if ([[[QBSession currentSession] currentUser] password] != nil)
-            {
-                [self createCaches];
+                [self createCachesWithPassword:user.password];
                 [self.chatService loadCachedDialogsWithCompletion: nil];
-            }
             
 			if (completion != nil) {
 				completion(NO, response.error.error.localizedDescription);
@@ -117,7 +114,7 @@
 			return;
 		}
         
-        [self createCaches];
+        [self createCachesWithPassword:user.password];
         [self.chatService loadCachedDialogsWithCompletion: nil];
 
         [weakSelf.chatService connectWithCompletionBlock:^(NSError *error) {
@@ -190,13 +187,13 @@
     [QMUsersCache cleanDBWithStoreName:@"qb-users-cache"];
 }
 
-- (void) createCaches
+- (void) createCachesWithPassword: (NSString*) password
 {
     if (!isCachesCreated) {
         isCachesCreated = YES;
-        [QMChatCache setupDBWithStoreNamed:@"sample-cache"];
+        [QMChatCache setupDBWithStoreNamed:@"sample-cache" withPassword: password];
         [QMChatCache instance].messagesLimitPerDialog = kQMMessagesLimitPerDialog;
-        [QMUsersCache setupDBWithStoreNamed:@"qb-users-cache"];
+        [QMUsersCache setupDBWithStoreNamed:@"qb-users-cache" withPassword: password];
     }
 }
 

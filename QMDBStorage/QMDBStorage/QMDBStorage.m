@@ -28,20 +28,29 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
 }
 
 - (instancetype)initWithStoreNamed:(NSString *)storeName model:(NSManagedObjectModel *)model queueLabel:(const char *)queueLabel {
-    
+    return [self initWithStoreNamed: storeName
+                              model: model
+                      storePassword: nil
+                         queueLabel: queueLabel];
+}
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                     storePassword:(NSString*) storePassword
+                        queueLabel:(const char *)queueLabel {
     self = [self init];
     if (self) {
         
         self.queue = dispatch_queue_create(queueLabel, DISPATCH_QUEUE_SERIAL);
         //Create Chat coredata stack
         
-        if (stackFactory) {
-            self.stack = [stackFactory createStackWithStoreName: storeName model: model];
+        if (stackFactory && storePassword) {
+            self.stack = [stackFactory createStackWithStoreName: storeName storePassword: storePassword model: model];
         }
         else {
             self.stack = [AutoMigratingQMCDRecordStack stackWithStoreNamed:storeName model:model];
         }
-		[QMCDRecordStack setDefaultStack:self.stack];
+        [QMCDRecordStack setDefaultStack:self.stack];
     }
     
     return self;
@@ -49,6 +58,11 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName {
     
+    NSAssert(nil, @"must be overloaded");
+}
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName withPassword: (NSString*) storePassword
+{
     NSAssert(nil, @"must be overloaded");
 }
 

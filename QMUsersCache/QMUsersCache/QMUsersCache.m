@@ -38,6 +38,17 @@ static QMUsersCache *_usersCacheInstance = nil;
                                                         queueLabel:"com.qmservices.QMUsersCacheQueue"];
 }
 
++ (void)setupDBWithStoreNamed:(NSString *)storeName withPassword: (NSString*) storePassword
+{
+    NSManagedObjectModel *model =
+    [NSManagedObjectModel QM_newModelNamed:@"QMUsersModel.momd"
+                             inBundleNamed:@"QMUsersCacheModel.bundle"];
+    _usersCacheInstance = [[QMUsersCache alloc] initWithStoreNamed: storeName
+                                                             model: model
+                                                     storePassword: storePassword
+                                                        queueLabel: "com.qmservices.QMUsersCacheQueue"];
+}
+
 + (void)cleanDBWithStoreName:(NSString *)name
 {
     if (_usersCacheInstance) {

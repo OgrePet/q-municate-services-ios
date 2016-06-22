@@ -22,7 +22,7 @@
 
 @protocol QMCDRecordStackFactory <NSObject>
 
-- (QMCDRecordStack*) createStackWithStoreName: (NSString*) storeName model: (NSManagedObjectModel*) model;
+- (QMCDRecordStack*) createStackWithStoreName: (NSString*) storeName storePassword: (NSString*) password model: (NSManagedObjectModel*) model;
 
 @end
 
@@ -37,12 +37,25 @@
 - (instancetype)initWithStoreNamed:(NSString *)storeName
                              model:(NSManagedObjectModel *)model
                         queueLabel:(const char *)queueLabel;
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                     storePassword:(NSString*) storePassword
+                        queueLabel:(const char *)queueLabel;
+
 /**
  * @brief Load CoreData(Sqlite) file
  * @param name - filename
  */
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName;
+
+/**
+ * @brief Load CoreData(Sqlite) file (password protected)
+ * @param name - filename
+ */
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName withPassword: (NSString*) storePassword;
 
 /**
  * @brief Clean data base with store name
