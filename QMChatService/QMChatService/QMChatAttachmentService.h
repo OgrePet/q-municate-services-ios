@@ -101,6 +101,18 @@
 - (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImage:(UIImage *)image completion:(QBChatCompletionBlock)completion;
 
 /**
+ *  Upload and send attachment message to dialog.
+ *
+ *  @param message      QBChatMessage instance
+ *  @param dialog       QBChatDialog instance
+ *  @param chatService  QMChatService instance
+ *  @param imageData    Attachment image raw data
+ *  @param imageType    Attachment image MIME type
+ *  @param completion   Send message result
+ */
+- (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImageData:(NSData *)imageData imageType: (NSString*) imageType completion:(QBChatCompletionBlock)completion;
+
+/**
  *  Get image by attachment
  *
  *  @param attachment      QBChatAttachment instance

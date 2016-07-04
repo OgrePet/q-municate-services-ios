@@ -63,11 +63,21 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
 
 - (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImage:(UIImage *)image completion:(QBChatCompletionBlock)completion {
     
+    [self uploadAndSendAttachmentMessage: message
+                                toDialog: dialog
+                         withChatService: chatService
+                   withAttachedImageData: UIImagePNGRepresentation(image)
+                               imageType: @"image/png"
+                              completion: completion];
+
+}
+
+
+- (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImageData:(NSData *)imageData imageType: (NSString*) imageType completion:(QBChatCompletionBlock)completion
+{
     [self changeMessageAttachmentStatus:QMMessageAttachmentStatusLoading forMessage:message];
     
-    NSData *imageData = UIImagePNGRepresentation(image);
-    
-    [QBRequest TUploadFile:imageData fileName:@"attachment" contentType:@"image/png" isPublic:NO successBlock:^(QBResponse *response, QBCBlob *blob) {
+    [QBRequest TUploadFile:imageData fileName:@"attachment" contentType: imageType isPublic:NO successBlock:^(QBResponse *response, QBCBlob *blob) {
         
         QBChatAttachment *attachment = [QBChatAttachment new];
         attachment.type = @"image";
@@ -78,14 +88,14 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
         message.text = @"Attachment image";
         
         [self saveImageData:imageData chatAttachment:attachment error:nil];
-        [self.attachmentsStorage setObject:image forKey:attachment.ID];
+        [self.attachmentsStorage setObject: [UIImage imageWithData: imageData] forKey:attachment.ID];
         
         [self changeMessageAttachmentStatus:QMMessageAttachmentStatusLoaded forMessage:message];
         
         [chatService sendMessage:message type:QMMessageTypeText toDialog:dialog saveToHistory:YES saveToStorage:YES completion:completion];
         
     } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
-
+        
         if ([self.delegate respondsToSelector:@selector(chatAttachmentService:didChangeUploadingProgress:forMessage:)]) {
             [self.delegate chatAttachmentService:self didChangeUploadingProgress:status.percentOfCompletion forMessage:message];
         }
