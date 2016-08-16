@@ -27,6 +27,7 @@ NSString const *kQMCustomParameterDialogRoomLastMessageDate = @"room_last_messag
 NSString const *kQMCustomParameterDialogUpdatedDate = @"dialog_updated_date";
 NSString const *kQMCustomParameterDialogType = @"type";
 NSString const *kQMCustomParameterDialogRoomUpdatedDate = @"room_updated_date";
+NSString const *kQMCustomParameterDialogRoomJID = @"room_jid";
 
 /**
  *  Public dialog keys
@@ -158,6 +159,10 @@ NSString const *kQMCustomParameterDialogDeletedOccupantsIDs = @"deleted_occupant
         
         NSString *strIDs = [dialog.occupantIDs componentsJoinedByString:@","];
         self.context[kQMCustomParameterDialogCurrentOccupantsIDs] = strIDs;
+        
+        if (dialog.roomJID) {
+            self.context[kQMCustomParameterDialogRoomJID] = dialog.roomJID;
+        }
     }
 }
 
