@@ -327,6 +327,15 @@ typedef void(^QMCacheCollection)(NSArray *collection);
 - (void)messagesWithChatDialogID:(NSString *)chatDialogID completion:(void(^)(QBResponse *response, NSArray *messages))completion;
 
 /**
+ *  Fetch messages with chat dialog id.
+ *
+ *  @param chatDialogID Chat dialog id.
+ *  @param markAsRead   For NO value fetched messages will not mark as read
+ *  @param completion   Block with response instance and array of chat messages if request succeded or nil if failed.
+ */
+- (void)messagesWithChatDialogID:(NSString *)chatDialogID markAsRead: (BOOL) markAsRead completion:(void(^)(QBResponse *response, NSArray *messages))completion;
+
+/**
  *  Loads messages that are older than oldest message in cache.
  *
  *  @param chatDialogID Chat dialog identifier

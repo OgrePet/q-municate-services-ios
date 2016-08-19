@@ -343,7 +343,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         
         __weak __typeof(self)weakSelf = self;
         
-        [self messagesWithChatDialogID:message.dialogID completion:^(QBResponse *response, NSArray *messages) {
+        [self messagesWithChatDialogID:message.dialogID markAsRead: NO completion:^(QBResponse *response, NSArray *messages) {
             //
             __typeof(weakSelf)strongSelf = weakSelf;
             QBChatDialog *dialogToAdd = message.dialog;
@@ -885,6 +885,11 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 }
 
 - (void)messagesWithChatDialogID:(NSString *)chatDialogID completion:(void(^)(QBResponse *response, NSArray *messages))completion {
+ 
+    [self messagesWithChatDialogID: chatDialogID markAsRead: YES completion: completion];
+}
+
+- (void)messagesWithChatDialogID:(NSString *)chatDialogID markAsRead: (BOOL) markAsRead completion:(void(^)(QBResponse *response, NSArray *messages))completion {
 	
     dispatch_group_t messagesLoadGroup = dispatch_group_create();
     if ([[self.messagesMemoryStorage messagesWithDialogID:chatDialogID] count] == 0) {
@@ -903,6 +908,9 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         
         QBResponsePage *page = [QBResponsePage responsePageWithLimit:strongSelf.chatMessagesPerPage];
         NSMutableDictionary *parameters = [@{@"sort_desc" : @"date_sent"} mutableCopy];
+        if (!markAsRead) {
+            parameters[@"mark_as_read"] = @(0);
+        }
         
         NSDate *lastMessagesLoadDate = self.lastMessagesLoadDate[chatDialogID];
         QBChatMessage *lastMessage = [strongSelf.messagesMemoryStorage lastMessageFromDialogID:chatDialogID];
