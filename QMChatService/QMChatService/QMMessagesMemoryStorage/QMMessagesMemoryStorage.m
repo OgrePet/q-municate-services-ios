@@ -153,6 +153,13 @@
     return nil;
 }
 
+- (BOOL)isMessageExistent:(QBChatMessage *)message forDialogID:(NSString *)dialogID {
+    
+    NSMutableOrderedSet *messages = self.datasources[dialogID];
+    
+    return [messages containsObject:message];
+}
+
 #pragma mark - QMMemeoryStorageProtocol
 
 - (void)free {

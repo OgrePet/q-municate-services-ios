@@ -1102,18 +1102,27 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 	
 	__weak __typeof(self)weakSelf = self;
     [dialog sendMessage:message completionBlock:^(NSError *error) {
-        //
-        if (error == nil && saveToStorage) {
-            [self.messagesMemoryStorage addMessage:message forDialogID:dialog.ID];
+        
+        __typeof(weakSelf)strongSelf = weakSelf;
+        
+        // there is a case when message that was returned from server (Group dialogs)
+        // will be handled faster then this completion block been fired
+        // therefore there is no need to add local message to memory storage, while server
+        // up-to-date one is already there
+        
+        BOOL messageExists = [strongSelf.messagesMemoryStorage isMessageExistent: message forDialogID: message.dialogID];
+        
+        if (error == nil && !messageExists && saveToStorage) {
+            [strongSelf.messagesMemoryStorage addMessage:message forDialogID:dialog.ID];
             
-            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didAddMessageToMemoryStorage:forDialogID:)]) {
-                [self.multicastDelegate chatService:self didAddMessageToMemoryStorage:message forDialogID:dialog.ID];
+            if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didAddMessageToMemoryStorage:forDialogID:)]) {
+                [strongSelf.multicastDelegate chatService:self didAddMessageToMemoryStorage:message forDialogID:dialog.ID];
             }
             
             [weakSelf updateParamsForQBChatDialog:dialog withQBChatMessage:message];
 			
-            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
-                [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:dialog];
+            if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                [strongSelf.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:dialog];
             }
         }
         
