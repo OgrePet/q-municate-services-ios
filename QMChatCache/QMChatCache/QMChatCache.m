@@ -8,6 +8,7 @@
 
 #import "QMChatCache.h"
 #import "QMCCModelIncludes.h"
+#import <Crashlytics/Crashlytics.h>
 
 @implementation QMChatCache
 
@@ -172,7 +173,8 @@ static QMChatCache *_chatCacheInstance = nil;
 
 - (void)deleteDialogWithID:(NSString *)dialogID
                 completion:(dispatch_block_t)completion {
-    
+
+    [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"deleting dialog from cache", @"dialogId" : dialogID}];
     __weak __typeof(self)weakSelf = self;
     [self async:^(NSManagedObjectContext *context) {
         
@@ -185,6 +187,7 @@ static QMChatCache *_chatCacheInstance = nil;
 
 - (void)deleteAllDialogs:(dispatch_block_t)completion {
     
+    [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"deleting all dialogs from cache"}];
     __weak __typeof(self)weakSelf = self;
     [self async:^(NSManagedObjectContext *context) {
         

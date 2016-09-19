@@ -8,6 +8,7 @@
 
 #import "QMChatService.h"
 #import "QBChatMessage+QMCustomParameters.h"
+#import <Crashlytics/Crashlytics.h>
 
 const char *kChatCacheQueue = "com.q-municate.chatCacheQueue";
 static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
@@ -85,6 +86,15 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 			// We need only current users dialog
             NSArray* userDialogs = [collection filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"%lu IN self.occupantIDs", [QBSession currentSession].currentUser.ID]];
             
+            if (userDialogs.count == 0 || collection.count == 0) {
+                [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil]
+                                   withAdditionalUserInfo:@{@"Reason" : @"Loaded 0 dialogs from cache (or filtered them all)",
+                                                            @"Loaded dialogs count" : @(collection.count),
+                                                            @"Filtered dialogs count" : @(userDialogs.count),
+                                                            @"User id" : @([QBSession currentSession].currentUser.ID)}];
+
+            }
+            
 			[weakSelf.dialogsMemoryStorage addChatDialogs:userDialogs andJoin:NO];
 			
 			if ([weakSelf.multicastDelegate respondsToSelector:@selector(chatService:didAddChatDialogsToMemoryStorage:)]) {
@@ -103,7 +113,11 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                 completion();
             }
 		}];
-	}
+    } else {
+        [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"Trying to load dialgos but don't find method cachedDialogs",
+                                                                                                                                 @"Is cahce nil?" : self.cacheDataSource == nil ? @"YES" : @"NO"}];
+
+    }
 }
 
 - (void)loadCachedMessagesWithDialogID:(NSString *)dialogID compleion:(void(^)())completion {
@@ -553,6 +567,8 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         //
         if (error != nil) {
             if (error.code == 201 || error.code == 404 || error.code == 407) {
+                
+                [[Crashlytics sharedInstance] recordError:error withAdditionalUserInfo:@{@"Reason" : @"deleting dialog from joining dialog fail", @"dialogId" : dialogID}];
                 
                 [self.dialogsMemoryStorage deleteChatDialogWithID:dialogID];
                 
@@ -1028,6 +1044,11 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
     NSMutableDictionary *extendedRequest = @{@"_id":dialogID}.mutableCopy;
     [QBRequest dialogsForPage:responsePage extendedRequest:extendedRequest successBlock:^(QBResponse *response, NSArray *dialogObjects, NSSet *dialogsUsersIDs, QBResponsePage *page) {
         if ([dialogObjects firstObject] != nil) {
+            
+            if ([weakSelf.dialogsMemoryStorage unsortedDialogs].count == 0) {
+                [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"Adding dialog to memory storage when it is empty from loading dialog!!!"}];
+            }
+            
             [weakSelf.dialogsMemoryStorage addChatDialog:[dialogObjects firstObject] andJoin:self.isAutoJoinEnabled completion:nil];
             if ([weakSelf.multicastDelegate respondsToSelector:@selector(chatService:didAddChatDialogToMemoryStorage:)]) {
                 [weakSelf.multicastDelegate chatService:weakSelf didAddChatDialogToMemoryStorage:[dialogObjects firstObject]];
