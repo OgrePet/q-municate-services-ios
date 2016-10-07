@@ -27,6 +27,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 
 @property (weak, nonatomic)   BFTask* loadEarlierMessagesTask;
 @property (strong, nonatomic) NSMutableDictionary *loadedAllMessages;
+@property (strong, nonatomic) NSMutableDictionary *lastMessagesLoadDate;
 
 @end
 
@@ -54,6 +55,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
 		_automaticallySendPresences = YES;
         
         _loadedAllMessages = [NSMutableDictionary dictionary];
+        _lastMessagesLoadDate = [NSMutableDictionary dictionary];
         
         if ([QBSession currentSession].currentUser != nil) [self loadCachedDialogsWithCompletion:nil];
     }
@@ -911,7 +913,16 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         }
         
         QBChatMessage *lastMessage = [strongSelf.messagesMemoryStorage lastMessageFromDialogID:chatDialogID];
-        parameters[@"date_sent[gt]"] = @([lastMessage.dateSent timeIntervalSince1970]);
+        
+        NSDate *lastMessagesLoadDate = self.lastMessagesLoadDate[chatDialogID];
+        if (lastMessagesLoadDate == nil) {
+            lastMessagesLoadDate = lastMessage.dateSent;
+            if (lastMessagesLoadDate != nil) {
+                strongSelf.lastMessagesLoadDate[chatDialogID] = lastMessagesLoadDate;
+            }
+        }
+        
+        parameters[@"date_sent[gt]"] = @([lastMessagesLoadDate timeIntervalSince1970]);
         
         [QBRequest messagesWithDialogID:chatDialogID
                         extendedRequest:parameters
@@ -921,6 +932,9 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                                NSArray* sortedMessages = [[messages reverseObjectEnumerator] allObjects];
                                
                                if ([sortedMessages count] > 0) {
+                                   
+                                   QBChatMessage *lastRecievedMessage = sortedMessages.lastObject;
+                                   strongSelf.lastMessagesLoadDate[chatDialogID] = lastRecievedMessage.dateSent;
                                    
                                    if (lastMessage == nil) {
                                        [strongSelf.messagesMemoryStorage replaceMessages:sortedMessages forDialogID:chatDialogID];
@@ -1224,16 +1238,22 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         if (![message.readIDs containsObject:@([QBSession currentSession].currentUser.ID)]) {
             message.markable = YES;
             
-            if (chatDialogToUpdate.unreadMessagesCount > 0) {
-                chatDialogToUpdate.unreadMessagesCount--;
-            }
-            
             __weak __typeof(self)weakSelf = self;
             dispatch_group_enter(readGroup);
             [[QBChat instance] readMessage:message completion:^(NSError *error) {
                 //
                 if (error == nil) {
                     __typeof(weakSelf)strongSelf = weakSelf;
+                    
+                    QBChatDialog *chatDialogToUpdate = [self.dialogsMemoryStorage chatDialogWithID:dialogID];
+                    if (chatDialogToUpdate.unreadMessagesCount > 0) {
+                        chatDialogToUpdate.unreadMessagesCount--;
+                        
+                        // updating dialog in cache
+                        if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                            [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:chatDialogToUpdate];
+                        }
+                    }
                     
                     // updating message in memory storage
                     [strongSelf.messagesMemoryStorage addMessage:message forDialogID:message.dialogID];
@@ -1247,10 +1267,6 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         }
     }
     
-    // updating dialog in cache
-    if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
-        [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:chatDialogToUpdate];
-    }
     
     dispatch_group_notify(readGroup, dispatch_get_main_queue(), ^{
         
