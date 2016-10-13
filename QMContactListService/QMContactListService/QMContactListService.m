@@ -89,7 +89,6 @@
 #pragma mark - QBChatDelegate
 
 - (void)chatContactListDidChange:(QBContactList *)contactList {
-    
     [self.contactListMemoryStorage updateWithContactList:contactList];
     
     if ([self.multicastDelegate respondsToSelector:@selector(contactListService:contactListDidChange:)]) {
@@ -100,6 +99,12 @@
 - (void)chatDidReceiveContactItemActivity:(NSUInteger)userID isOnline:(BOOL)isOnline status:(NSString *)status {
     if ([self.multicastDelegate respondsToSelector:@selector(contactListService:didReceiveContactItemActivity:isOnline:status:)]) {
         [self.multicastDelegate contactListService:self didReceiveContactItemActivity:userID isOnline:isOnline status:status];
+    }
+}
+
+- (void)chatDidReceiveContactAddRequestFromUser:(NSUInteger)userID {
+    if ([self.multicastDelegate respondsToSelector:@selector(contactListService: didReceiveContactAddRequestFromUser:)]) {
+        [self.multicastDelegate contactListService:self didReceiveContactAddRequestFromUser:userID];
     }
 }
 
