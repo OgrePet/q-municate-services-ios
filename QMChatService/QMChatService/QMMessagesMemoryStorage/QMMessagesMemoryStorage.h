@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return return array of QBChatMessage instances
  */
-- (NSArray QB_GENERIC(QBChatMessage *) *)messagesWithDialogID:(NSString *)dialogID;
+- (nullable NSArray QB_GENERIC(QBChatMessage *) *)messagesWithDialogID:(NSString *)dialogID;
 
 /**
  *  Delete message from memory storage.

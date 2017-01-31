@@ -88,7 +88,7 @@ static NSString* attachmentPath(QBChatAttachment *attachment) {
         message.text = @"Attachment image";
         
         [strongSelf saveImageData:imageData chatAttachment:attachment error:nil];
-        strongSelf.attachmentsStorage[attachment.ID] = imageData;
+        strongSelf.attachmentsStorage[attachment.ID] = [UIImage imageWithData:imageData];
         
         [strongSelf changeMessageAttachmentStatus:QMMessageAttachmentStatusLoaded forMessage:message];
         

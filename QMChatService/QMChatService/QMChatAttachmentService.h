@@ -136,7 +136,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @return Return cached UIImage nil if there is no cached image
  
  */
-- (UIImage *)cachedImageForAttachmentMessage:(QBChatMessage*) attachmentMessage;
+- (nullable UIImage *)cachedImageForAttachmentMessage:(QBChatMessage*) attachmentMessage;
 
 @end
 

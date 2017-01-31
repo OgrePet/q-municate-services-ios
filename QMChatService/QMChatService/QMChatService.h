@@ -244,6 +244,23 @@ typedef NS_ENUM(NSUInteger, QMChatConnectionState) {
 #pragma mark - Notification messages
 
 /**
+ *  Send message about updated dialog with dialog inside and notification.
+ *
+ *  @param updatedDialog        updated dialog
+ *  @param notificationText     notification text
+ *  @param customParameters     {NSNumber : NSDictionary} dictionary of custom parameters
+ *  @param completion           completion block with failure error
+ *
+ * @warning *Deprecated in QMServices 0.3.3:* Use 'sendNotificationMessageAboutAddingOccupants:toDialog:completion:', 'sendNotificationMessageAboutLeavingDialog:completion:', 'sendNotificationMessageAboutChangingDialogPhoto:completion:' or 'sendNotificationMessageAboutChangingDialogName:completion:' depending on update type instead.
+ */
+- (void)sendMessageAboutUpdateDialog:(QBChatDialog *)updatedDialog
+                withNotificationText:(NSString *)notificationText
+                    customParameters:(NSDictionary *)customParameters
+                          completion:(QBChatCompletionBlock)completion
+DEPRECATED_MSG_ATTRIBUTE("Deprecated in 0.3.3. Use 'sendNotificationMessageAboutAddingOccupants:toDialog:completion:', 'sendNotificationMessageAboutLeavingDialog:completion:', 'sendNotificationMessageAboutChangingDialogPhoto:completion:' or 'sendNotificationMessageAboutChangingDialogName:completion:' depending on update type instead.");
+
+
+/**
  *  Send message about accepting or rejecting contact requst.
  *
  *  @param accept     YES - accept, NO reject
