@@ -12,6 +12,8 @@
 @class QMChatService;
 @class QMChatAttachmentService;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol QMChatAttachmentDataCryptor <NSObject>
 
 - (nullable NSData*) encryptedDataFromData: (NSData* _Nonnull) plainData;
@@ -63,7 +65,7 @@
 /**
  *  Chat attachment service delegate
  */
-@property (nonatomic, weak) id<QMChatAttachmentServiceDelegate> delegate;
+@property (nonatomic, weak, nullable) id<QMChatAttachmentServiceDelegate> delegate;
 
 /**
  *  Determines whether attachment service will cache images on disk or not.
@@ -77,19 +79,6 @@
 @property (nonatomic, assign) id<QMChatAttachmentDataCryptor> dataCryptor;
 
 /**
- *  Send message with attachment to dialog
- *
- *  @param message      QBChatMessage instance
- *  @param dialog       QBChatDialog instance
- *  @param chatService  QMChatService instance
- *  @param image        Attachment image
- *  @param completion   Send message result
- *
- *  @warning *Deprecated in QMServices 0.3.2:* Use '[chatService sendAttachmentMessage:toDialog:withAttachmentImage:completion:]' instead.
- */
-- (void)sendMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImage:(UIImage *)image completion:(void(^)(NSError *error))completion DEPRECATED_MSG_ATTRIBUTE("Deprecated in 0.3.2. Use '[chatService sendAttachmentMessage:toDialog:withAttachmentImage:completion:]' instead.");
-
-/**
  *  Upload and send attachment message to dialog.
  *
  *  @param message      QBChatMessage instance
@@ -98,7 +87,7 @@
  *  @param image        Attachment image
  *  @param completion   Send message result
  */
-- (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImage:(UIImage *)image completion:(QBChatCompletionBlock)completion;
+- (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImage:(UIImage *)image completion:(nullable QBChatCompletionBlock)completion;
 
 /**
  *  Upload and send attachment message to dialog.
@@ -113,22 +102,30 @@
 - (void)uploadAndSendAttachmentMessage:(QBChatMessage *)message toDialog:(QBChatDialog *)dialog withChatService:(QMChatService *)chatService withAttachedImageData:(NSData *)imageData imageType: (NSString*) imageType completion:(QBChatCompletionBlock)completion;
 
 /**
- *  Get image by attachment
- *
- *  @param attachment      QBChatAttachment instance
- *  @param completion      Fetch image result
- *
- *  @warning *Deprecated in QMServices 0.3.2:* Use 'getImageForAttachmentMessage:completion:' instead.
- */
-- (void)getImageForChatAttachment:(QBChatAttachment *)attachment completion:(void (^)(NSError *error, UIImage *image))completion DEPRECATED_MSG_ATTRIBUTE("Deprecated in 0.3.2. Use 'getImageForAttachmentMessage:completion:' instead.");
-
-/**
  *  Get image by attachment message.
  *
  *  @param attachmentMessage      message with attachment
  *  @param completion             fetched image or error if failed
+ *
+ *  @warning *Deprecated in QMServices 0.4.4:* Use 'imageForAttachmentMessage:completion:' instead.
  */
-- (void)getImageForAttachmentMessage:(QBChatMessage *)attachmentMessage completion:(void(^)(NSError *error, UIImage *image))completion;
+- (void)getImageForAttachmentMessage:(QBChatMessage *)attachmentMessage completion:(nullable void(^)(NSError * _Nullable error, UIImage * _Nullable image))completion DEPRECATED_MSG_ATTRIBUTE("Deprecated in 0.4.4. Use 'imageForAttachmentMessage:completion:' instead.");
+
+/**
+ *  Get image by attachment message.
+ *
+ *  @param attachmentMessage message with attachment
+ *  @param completion        fetched image or error if failed
+ */
+- (void)imageForAttachmentMessage:(QBChatMessage *)attachmentMessage completion:(nullable void(^)(NSError * _Nullable error, UIImage * _Nullable image))completion;
+
+/**
+ *  Get image local image by attachment message.
+ *
+ *  @param attachmentMessage      message with attachment
+ *  @param completion             local image or nil if no image
+ */
+- (void)localImageForAttachmentMessage:(QBChatMessage *)attachmentMessage completion:(nullable void(^)(NSError * _Nullable error, UIImage * _Nullable image))completion;
 
 /**
  *  Get cached image by attachment message.
@@ -142,3 +139,5 @@
 - (UIImage *)cachedImageForAttachmentMessage:(QBChatMessage*) attachmentMessage;
 
 @end
+
+NS_ASSUME_NONNULL_END

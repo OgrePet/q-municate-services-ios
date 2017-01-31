@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "QMDBStorage.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QMContactListCache : QMDBStorage
 
 #pragma mark - Singleton
@@ -18,7 +20,7 @@
  *
  *  @return QMContactListCache instance
  */
-+ (QMContactListCache *)instance;
++ (nullable QMContactListCache *)instance;
 
 #pragma mark - Configure store
 
@@ -28,7 +30,7 @@
  *  @param storeName Store name
  */
 + (void)setupDBWithStoreNamed:(NSString *)storeName;
-
++ (void)setupDBWithStoreNamed:(NSString *)storeName applicationGroupIdentifier:(NSString *)appGroupIdentifier;
 /**
  *  Clean clean chat cache with store name
  *
@@ -48,15 +50,15 @@
  *  @param completion       Completion block is called after update or insert operation is completed
  */
 - (void)insertOrUpdateContactListItem:(QBContactListItem *)contactListItems
-                           completion:(dispatch_block_t)completion;
+                           completion:(nullable dispatch_block_t)completion;
 /**
  *  Insert/Update QBContactListItem's in cache
  *
  *  @param contactListItems Array of QBContactListItem instances
  *  @param completion       Completion block is called after update or insert operation is completed
  */
-- (void)insertOrUpdateContactListWithItems:(NSArray *)contactListItems
-                                completion:(dispatch_block_t)completion;
+- (void)insertOrUpdateContactListWithItems:(NSArray QB_GENERIC(QBContactListItem *) *)contactListItems
+                                completion:(nullable dispatch_block_t)completion;
 
 /**
  *  Insert/Update QBContactListItem's in cache
@@ -65,7 +67,7 @@
  *  @param completion  Completion block is called after update or insert operation is completed
  */
 - (void)insertOrUpdateContactListItemsWithContactList:(QBContactList *)contactList
-                                           completion:(dispatch_block_t)completion;
+                                           completion:(nullable dispatch_block_t)completion;
 /**
  *  Delete ContactListItem from cache
  *
@@ -73,14 +75,14 @@
  *  @param completion       Completion block is called after delete operation is completed
  */
 - (void)deleteContactListItem:(QBContactListItem *)contactListItem
-                   completion:(dispatch_block_t)completion;
+                   completion:(nullable dispatch_block_t)completion;
 
 /**
  *  Delete all contact list items
  *
  *  @param completion Completion block is called after delete contact list items operation is completed
  */
-- (void)deleteContactList:(dispatch_block_t)completion;
+- (void)deleteContactList:(nullable dispatch_block_t)completion;
 
 #pragma mark Fetch ContactList operations
 
@@ -89,7 +91,7 @@
  *
  *  @param completion Completion block that is called after the fetch has completed. Returns an array of QBContactListItem instances
  */
-- (void)contactListItems:(void(^)(NSArray *contactListItems))completion;
+- (void)contactListItems:(nullable void(^)(NSArray QB_GENERIC(QBContactListItem *) *contactListItems))completion;
 
 /**
  *  Fetch contact list item wiht user ID
@@ -98,7 +100,9 @@
  *  @param completion Completion block that is called after the fetch has completed. Returns an instance of QBContactListItem
  */
 - (void)contactListItemWithUserID:(NSUInteger)userID
-                        completion:(void(^)(QBContactListItem *))completion;
+                       completion:(nullable void(^)(QBContactListItem *contactListItems))completion;
 
 
 @end
+
+NS_ASSUME_NONNULL_END

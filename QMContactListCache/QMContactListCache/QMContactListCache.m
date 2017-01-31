@@ -11,6 +11,8 @@
 #import "CDContactListItem.h"
 #import "CDUser.h"
 
+#import "QMSLog.h"
+
 @implementation QMContactListCache
 
 static QMContactListCache *_chatCacheInstance = nil;
@@ -27,14 +29,21 @@ static QMContactListCache *_chatCacheInstance = nil;
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName {
     
+    [self setupDBWithStoreNamed:storeName applicationGroupIdentifier:nil];
+}
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName applicationGroupIdentifier:(NSString *)appGroupIdentifier {
+    
     NSManagedObjectModel *model =
     [NSManagedObjectModel QM_newModelNamed:@"QMContactListModel.momd"
-                             inBundleNamed:@"QMContactListCacheModel.bundle"];
+                             inBundleNamed:@"QMContactListCacheModel.bundle"
+                                 fromClass:[self class]];
     
     _chatCacheInstance =
     [[QMContactListCache alloc] initWithStoreNamed:storeName
                                              model:model
-                                        queueLabel:"com.qmunicate.QMContactListCacheBackgroundQueue"];
+                                        queueLabel:"com.qmunicate.QMContactListCacheBackgroundQueue"
+                        applicationGroupIdentifier:appGroupIdentifier];
 }
 
 + (void)cleanDBWithStoreName:(NSString *)name {
@@ -60,6 +69,9 @@ static QMContactListCache *_chatCacheInstance = nil;
     __weak __typeof(self)weakSelf = self;
     
     [self async:^(NSManagedObjectContext *context) {
+        
+        // clearing old contact list first
+        [CDContactListItem QM_truncateAllInContext:context];
         
         NSMutableArray *toInsert = [NSMutableArray array];
         NSMutableArray *toUpdate = [NSMutableArray array];
@@ -91,12 +103,9 @@ static QMContactListCache *_chatCacheInstance = nil;
             [weakSelf insertContactListItems:toInsert inContext:context];
         }
         
-        if (toInsert.count + toUpdate.count > 0) {
-            [weakSelf save:completion];
-        }
+        [weakSelf save:completion];
         
-        NSLog(@"ContactListItems to insert %lu", (unsigned long)toInsert.count);
-        NSLog(@"ContactListItems to update %lu", (unsigned long)toUpdate.count);
+        QMSLog(@"[%@] ContactListItems to insert %tu, update %tu", NSStringFromClass([self class]), toInsert.count, toUpdate.count);
     }];
 }
 
@@ -170,7 +179,7 @@ static QMContactListCache *_chatCacheInstance = nil;
     return contactListItems;
 }
 
-- (void)contactListItems:(void(^)(NSArray *contactListItems))completion{
+- (void)contactListItems:(void(^)(NSArray *contactListItems))completion {
     
     __weak __typeof(self)weakSelf = self;
     [self async:^(NSManagedObjectContext *context) {

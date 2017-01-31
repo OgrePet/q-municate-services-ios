@@ -13,6 +13,8 @@
 @protocol QMUsersServiceDelegate;
 @protocol QMUsersServiceCacheDataSource;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QMUsersService : QMBaseService
 
 /**
@@ -29,7 +31,7 @@
  *  @return QMUsersService instance
  */
 - (instancetype)initWithServiceManager:(id<QMServiceManagerProtocol>)serviceManager
-                       cacheDataSource:(id<QMUsersServiceCacheDataSource>)cacheDataSource;
+                       cacheDataSource:(nullable id<QMUsersServiceCacheDataSource>)cacheDataSource;
 
 /**
  *  Add instance that confirms users service multicaste protocol.
@@ -64,6 +66,18 @@
 - (BFTask QB_GENERIC(QBUUser *) *)getUserWithID:(NSUInteger)userID;
 
 /**
+ *  Get user by id.
+ *
+ *  @param userID       id of user to retreive
+ *  @param forceLoad    whether user should be loaded from server even when he is already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update user in cache by loading him from server.
+ *
+ *  @return BFTask with QBUUser as a result
+ */
+- (BFTask QB_GENERIC(QBUUser *) *)getUserWithID:(NSUInteger)userID forceLoad:(BOOL)forceLoad;
+
+/**
  *  Get users by ids.
  *
  *  @param userIDs  array of user ids
@@ -71,6 +85,18 @@
  *  @return BFTask with NSArray of QBUUser instances as a result
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithIDs:(NSArray QB_GENERIC(NSNumber *) *)usersIDs;
+
+/**
+ *  Get users by ids.
+ *
+ *  @param userIDs      array of user ids
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithIDs:(NSArray QB_GENERIC(NSNumber *) *)usersIDs forceLoad:(BOOL)forceLoad;
 
 /**
  *  Get users by ids with extended pagination parameters.
@@ -83,6 +109,40 @@
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithIDs:(NSArray QB_GENERIC(NSNumber *) *)usersIDs page:(QBGeneralResponsePage *)page;
 
 /**
+ *  Get users by ids with extended pagination parameters.
+ *
+ *  @param userIDs      array of user ids
+ *  @param page         QBGeneralResponsePage instance with extended pagination parameters
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithIDs:(NSArray QB_GENERIC(NSNumber *) *)usersIDs page:(QBGeneralResponsePage *)page forceLoad:(BOOL)forceLoad;
+
+/**
+ *  Get user with
+ *
+ *  @param externalUserID external user ID
+ *
+ *  @return BFTask with user as a result.
+ */
+- (BFTask QB_GENERIC(QBUUser *) *)getUserWithExternalID:(NSUInteger)externalUserID;
+
+/**
+ *  Get user with
+ *
+ *  @param externalUserID external user ID
+ *  @param forceLoad      whether user should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update user in cache by loading him from server.
+ *
+ *  @return BFTask with user as a result.
+ */
+- (BFTask QB_GENERIC(QBUUser *) *)getUserWithExternalID:(NSUInteger)externalUserID forceLoad:(BOOL)forceLoad;
+
+/**
  *  Get users by emails.
  *
  *  @param emails   array of user emails
@@ -90,6 +150,18 @@
  *  @return BFTask with NSArray of QBUUser instances as a result
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithEmails:(NSArray QB_GENERIC(NSString *) *)emails;
+
+/**
+ *  Get users by emails.
+ *
+ *  @param emails       array of user emails
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithEmails:(NSArray QB_GENERIC(NSString *) *)emails forceLoad:(BOOL)forceLoad;
 
 /**
  *  Get users by emails with extended pagination parameters.
@@ -102,6 +174,19 @@
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithEmails:(NSArray QB_GENERIC(NSString *) *)emails page:(QBGeneralResponsePage *)page;
 
 /**
+ *  Get users by emails with extended pagination parameters.
+ *
+ *  @param emails       array of user emails
+ *  @param page         QBGeneralResponsePage instance with extended pagination parameters
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithEmails:(NSArray QB_GENERIC(NSString *) *)emails page:(QBGeneralResponsePage *)page forceLoad:(BOOL)forceLoad;
+
+/**
  *  Get users by facebook ids.
  *
  *  @param facebookIDs  array of user facebook ids
@@ -109,6 +194,18 @@
  *  @return BFTask with NSArray of QBUUser instances as a result
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithFacebookIDs:(NSArray QB_GENERIC(NSString *) *)facebookIDs;
+
+/**
+ *  Get users by facebook ids.
+ *
+ *  @param facebookIDs  array of user facebook ids
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithFacebookIDs:(NSArray QB_GENERIC(NSString *) *)facebookIDs forceLoad:(BOOL)forceLoad;
 
 /**
  *  Get users by facebook ids with extended pagination parameters.
@@ -121,6 +218,57 @@
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithFacebookIDs:(NSArray QB_GENERIC(NSString *) *)facebookIDs page:(QBGeneralResponsePage *)page;
 
 /**
+ *  Get users by facebook ids with extended pagination parameters.
+ *
+ *  @param facebookIDs  array of user facebook ids
+ *  @param page         QBGeneralResponsePage instance with extended pagination parameters
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithFacebookIDs:(NSArray QB_GENERIC(NSString *) *)facebookIDs page:(QBGeneralResponsePage *)page forceLoad:(BOOL)forceLoad;
+
+/**
+ *  Get users by twitter ids.
+ *
+ *  @param twitterIDs array of user twitter ids
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithTwitterIDs:(NSArray QB_GENERIC(NSString *) *)twitterIDs;
+
+/**
+ *  Get users by twitter ids.
+ *
+ *  @param twitterIDs array of user twitter ids
+ *  @param forceLoad  whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithTwitterIDs:(NSArray QB_GENERIC(NSString *) *)twitterIDs forceLoad:(BOOL)forceLoad;
+
+/**
+ *  Get users by twitter ids with extended pagination parameters.
+ *
+ *  @param twitterIDs array of user twitter ids
+ *  @param page       QBGeneralResponsePage instance with extended pagination parameters
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithTwitterIDs:(NSArray QB_GENERIC(NSString *) *)twitterIDs page:(QBGeneralResponsePage *)page;
+
+/**
+ *  Get users by twitter ids with extended pagination parameters.
+ *
+ *  @param twitterIDs array of user twitter ids
+ *  @param page       QBGeneralResponsePage instance with extended pagination parameters
+ *  @param forceLoad  whether users should be loaded from server even when they are already existing in cache
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithTwitterIDs:(NSArray QB_GENERIC(NSString *) *)twitterIDs page:(QBGeneralResponsePage *)page forceLoad:(BOOL)forceLoad;
+
+/**
  *  Get users by logins.
  *
  *  @param logins   array of user logins
@@ -128,6 +276,18 @@
  *  @return BFTask with NSArray of QBUUser instances as a result
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithLogins:(NSArray QB_GENERIC(NSString *) *)logins;
+
+/**
+ *  Get users by logins.
+ *
+ *  @param logins       array of user logins
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithLogins:(NSArray QB_GENERIC(NSString *) *)logins forceLoad:(BOOL)forceLoad;
 
 /**
  *  Get users by logins with extended pagination parameters.
@@ -138,6 +298,19 @@
  *  @return BFTask with NSArray of QBUUser instances as a result
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithLogins:(NSArray QB_GENERIC(NSString *) *)logins page:(QBGeneralResponsePage *)page;
+
+/**
+ *  Get users by logins with extended pagination parameters.
+ *
+ *  @param logins       array of user logins
+ *  @param page         QBGeneralResponsePage instance with extended pagination parameters
+ *  @param forceLoad    whether users should be loaded from server even when they are already existing in cache
+ *
+ *  @discussion Use forceLoad flag if you want to update users in cache by loading them from server.
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)getUsersWithLogins:(NSArray QB_GENERIC(NSString *) *)logins page:(QBGeneralResponsePage *)page forceLoad:(BOOL)forceLoad;
 
 
 #pragma mark - Search
@@ -180,6 +353,25 @@
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)searchUsersWithTags:(NSArray QB_GENERIC(NSString *) *)tags page:(QBGeneralResponsePage *)page;
 
+/**
+ *  Search for users by phone numbers.
+ *
+ *  @param phoneNumbers   array of user phone numbers
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)searchUsersWithPhoneNumbers:(NSArray QB_GENERIC(NSString *) *)phoneNumbers;
+
+/**
+ *  Search for users by phone numbers with extended pagination parameters.
+ *
+ *  @param phoneNumbers array of user phone numbers
+ *  @param page         QBGeneralResponsePage instance with extended pagination parameters
+ *
+ *  @return BFTask with NSArray of QBUUser instances as a result
+ */
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)searchUsersWithPhoneNumbers:(NSArray QB_GENERIC(NSString *) *)phoneNumbers page:(QBGeneralResponsePage *)page;
+
 @end
 
 #pragma mark - Protocols
@@ -196,7 +388,7 @@
  *
  *  @param block Block for provide QBUUsers collection
  */
-- (void)cachedUsers:(void(^)(NSArray* collection))block;
+- (void)cachedUsersWithCompletion:(nullable void(^)(NSArray * _Nullable collection))block;
 
 @end
 
@@ -216,8 +408,18 @@
  *  Is called when users were added to QMUsersService.
  *
  *  @param usersService     QMUsersService instance
- *  @param user             NSArray of QBUUser instances as users
+ *  @param users            NSArray of QBUUser instances as users
  */
-- (void)usersService:(QMUsersService *)usersService didAddUsers:(NSArray QB_GENERIC(QBUUser *) *)user;
+- (void)usersService:(QMUsersService *)usersService didAddUsers:(NSArray QB_GENERIC(QBUUser *) *)users;
+
+/**
+ *  Is called when users were updated in cache by forcing its load from server.
+ *
+ *  @param usersService     QMUsersService instance
+ *  @param users            NSArray of QBUUser instances as users
+ */
+- (void)usersService:(QMUsersService *)usersService didUpdateUsers:(NSArray QB_GENERIC(QBUUser *) *)users;
 
 @end
+
+NS_ASSUME_NONNULL_END

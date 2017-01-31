@@ -10,6 +10,8 @@
 #import <Quickblox/Quickblox.h>
 #import "QMMemoryStorageProtocol.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QMDialogsMemoryStorage : NSObject <QMMemoryStorageProtocol>
 
 /**
@@ -19,7 +21,7 @@
  *  @param join        YES to join in dialog immediately
  *  @param completion  completion block with error if failed or nil if succeed
  */
-- (void)addChatDialog:(QBChatDialog *)chatDialog andJoin:(BOOL)join completion:(void(^)(QBChatDialog *addedDialog, NSError *error))completion;
+- (void)addChatDialog:(QBChatDialog *)chatDialog andJoin:(BOOL)join completion:(nullable void(^)(QBChatDialog *addedDialog, NSError * _Nullable error))completion;
 
 /**
  *  Add dialogs to memory storage
@@ -43,7 +45,7 @@
  *
  *  @return QBChatDialog instance
  */
-- (QBChatDialog *)chatDialogWithID:(NSString *)dialogID;
+- (nullable QBChatDialog *)chatDialogWithID:(NSString *)dialogID;
 
 /**
  *  Find private dialog in memory storage by opponent ID
@@ -52,7 +54,7 @@
  *
  *  @return QBChatDialog instance
  */
-- (QBChatDialog *)privateChatDialogWithOpponentID:(NSUInteger)opponentID;
+- (nullable QBChatDialog *)privateChatDialogWithOpponentID:(NSUInteger)opponentID;
 
 /**
  *  Get dialogs with unread messages in memory storage
@@ -105,3 +107,5 @@
 - (NSArray QB_GENERIC(QBChatDialog *) *)dialogsWithSortDescriptors:(NSArray QB_GENERIC(NSSortDescriptor *) *)descriptors;
 
 @end
+
+NS_ASSUME_NONNULL_END

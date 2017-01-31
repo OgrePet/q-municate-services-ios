@@ -9,6 +9,8 @@
 #import "QMUsersCache.h"
 #import "QMUsersModelIncludes.h"
 
+#import "QMSLog.h"
+
 @implementation QMUsersCache
 
 static QMUsersCache *_usersCacheInstance = nil;
@@ -28,14 +30,22 @@ static QMUsersCache *_usersCacheInstance = nil;
 
 #pragma mark - Configure store
 
-+ (void)setupDBWithStoreNamed:(NSString *)storeName
-{
++ (void)setupDBWithStoreNamed:(NSString *)storeName applicationGroupIdentifier:(NSString *)appGroupIdentifier {
+    
     NSManagedObjectModel *model =
     [NSManagedObjectModel QM_newModelNamed:@"QMUsersModel.momd"
-                             inBundleNamed:@"QMUsersCacheModel.bundle"];
+                             inBundleNamed:@"QMUsersCacheModel.bundle"
+                                 fromClass:[self class]];
+    
     _usersCacheInstance = [[QMUsersCache alloc] initWithStoreNamed:storeName
                                                              model:model
-                                                        queueLabel:"com.qmservices.QMUsersCacheQueue"];
+                                                        queueLabel:"com.qmservices.QMUsersCacheQueue"
+                                        applicationGroupIdentifier:appGroupIdentifier];
+}
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName
+{
+    return [self setupDBWithStoreNamed:storeName applicationGroupIdentifier:nil];
 }
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName withPassword: (NSString*) storePassword
@@ -67,6 +77,7 @@ static QMUsersCache *_usersCacheInstance = nil;
 - (BFTask *)insertOrUpdateUsers:(NSArray *)users
 {
     __weak __typeof(self)weakSelf = self;
+    
     return [BFTask taskFromExecutor:[BFExecutor executorWithDispatchQueue:self.queue] withBlock:^id{
         __typeof(self) strongSelf = weakSelf;
         
@@ -84,7 +95,7 @@ static QMUsersCache *_usersCacheInstance = nil;
                 
                 QBUUser *qbCachedUser = [cachedUser toQBUUser];
                 
-                if (![user isEqual:qbCachedUser]) {
+                if (![user.updatedAt isEqualToDate:qbCachedUser.updatedAt]) {
                     [toUpdate addObject:user];
                 }
             }
@@ -108,9 +119,8 @@ static QMUsersCache *_usersCacheInstance = nil;
             [context QM_saveToPersistentStoreAndWait];
         }
         
-        NSLog(@"Users to insert %lu", (unsigned long)toInsert.count);
-        NSLog(@"Users to update %lu", (unsigned long)toUpdate.count);
-
+        QMSLog(@"[%@] Users to insert %tu, update %tu", NSStringFromClass([weakSelf class]), toInsert.count, toUpdate.count);
+        
         return nil;
     }];
 }
@@ -125,7 +135,7 @@ static QMUsersCache *_usersCacheInstance = nil;
         CDUser *cachedUser = [CDUser QM_findFirstWithPredicate:IS(@"id", @(user.ID)) inContext:context];
         [cachedUser QM_deleteEntityInContext:context];
         
-        [context saveToPersistentStoreAndWait];
+        [context QM_saveToPersistentStoreAndWait];
         
         return nil;
     }];
@@ -140,7 +150,7 @@ static QMUsersCache *_usersCacheInstance = nil;
         
         [CDUser QM_truncateAllInContext:context];
         
-        [context saveToPersistentStoreAndWait];
+        [context QM_saveToPersistentStoreAndWait];
         return nil;
     }];
 }
@@ -148,7 +158,7 @@ static QMUsersCache *_usersCacheInstance = nil;
 - (BFTask *)userWithPredicate:(NSPredicate *) predicate
 {
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
-
+    
     [BFTask taskFromExecutor:[BFExecutor executorWithDispatchQueue:self.queue] withBlock:^id{
         
         CDUser *user = [CDUser QM_findFirstWithPredicate:predicate];

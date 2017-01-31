@@ -9,7 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "QMMemoryStorageProtocol.h"
 
+@protocol QMMemoryTemporaryQueueDelegate;
+
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QMMessagesMemoryStorage : NSObject <QMMemoryStorageProtocol>
+
+@property (weak, nonatomic, nullable) id <QMMemoryTemporaryQueueDelegate> delegate;
 
 /**
  *  Add message to memory storage
@@ -25,7 +31,7 @@
  *  @param messages Array of QBChatMessage items
  *  @param dialogID Chat dialog identifier
  */
-- (void)addMessages:(NSArray *)messages forDialogID:(NSString *)dialogID;
+- (void)addMessages:(NSArray QB_GENERIC(QBChatMessage *) *)messages forDialogID:(NSString *)dialogID;
 
 /**
  *  Replace messages in memory storage for dialog identifier
@@ -33,7 +39,7 @@
  *  @param messages Array of QBChatMessage instances to replace
  *  @param dialogID Chat dialog identifier
  */
-- (void)replaceMessages:(NSArray *)messages forDialogID:(NSString *)dialogID;
+- (void)replaceMessages:(NSArray QB_GENERIC(QBChatMessage *) *)messages forDialogID:(NSString *)dialogID;
 
 /**
  *  Updates message in memory storage. Dialog ID is taken from message.
@@ -51,7 +57,7 @@
  *
  *  @return return array of QBChatMessage instances
  */
-- (NSArray *)messagesWithDialogID:(NSString *)dialogID;
+- (NSArray QB_GENERIC(QBChatMessage *) *)messagesWithDialogID:(NSString *)dialogID;
 
 /**
  *  Delete message from memory storage.
@@ -66,7 +72,7 @@
  *  @param messages messages to delete
  *  @param dialogID chat dialog identifier
  */
-- (void)deleteMessages:(NSArray QB_GENERIC(QBChatMessage *)*)messages forDialogID:(NSString *)dialogID;
+- (void)deleteMessages:(NSArray QB_GENERIC(QBChatMessage *) *)messages forDialogID:(NSString *)dialogID;
 
 /**
  *  Delete messages with dialog indetifier
@@ -82,7 +88,7 @@
  *
  *  @return QBChatMessage object
  */
-- (QBChatMessage *)messageWithID:(NSString *)messageID fromDialogID:(NSString *)dialogID;
+- (nullable QBChatMessage *)messageWithID:(NSString *)messageID fromDialogID:(NSString *)dialogID;
 
 /**
  *  Get last message in memory storage from dialog by ID
@@ -91,7 +97,17 @@
  *
  *  @return QBChatMessage object
  */
-- (QBChatMessage *)lastMessageFromDialogID:(NSString *)dialogID;
+- (nullable QBChatMessage *)lastMessageFromDialogID:(NSString *)dialogID;
+
+/**
+ *  Is message existent for dialog.
+ *
+ *  @param message  QBChatMessage instance
+ *  @param dialogID dialog ID
+ *
+ *  @return whether message existent for a specific dialog
+ */
+- (BOOL)isMessageExistent:(QBChatMessage *)message forDialogID:(NSString *)dialogID;
 
 /**
  *  Is message existent for dialog.
@@ -121,6 +137,16 @@
  *
  *  @return QBChatMessage object
  */
-- (QBChatMessage *)oldestMessageForDialogID:(NSString *)dialogID;
+- (nullable QBChatMessage *)oldestMessageForDialogID:(NSString *)dialogID;
 
 @end
+
+@protocol QMMemoryTemporaryQueueDelegate <NSObject>
+
+@optional
+
+- (nullable NSArray *)localMessagesForDialogWithID:(NSString *)dialogID;
+
+@end
+
+NS_ASSUME_NONNULL_END

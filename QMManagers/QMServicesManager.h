@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "QMServices.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  Base manager that handles authentication and chat functionality.
  */
@@ -22,7 +24,33 @@ QMUsersServiceCacheDataSource,
 QMUsersServiceDelegate
 >
 
+/**
+ *  REST authentication service.
+ */
+@property (strong, nonatomic, readonly) QMAuthService *authService;
+
+/**
+ *  Chat service.
+ */
+@property (strong, nonatomic, readonly) QMChatService *chatService;
+
+/**
+ *  Users service.
+ */
+@property (strong, nonatomic, readonly) QMUsersService *usersService;
+
 + (instancetype)instance;
+
+/**
+ *  Determines whether extended services logging is enabled.
+ *
+ *  @param enable whether logs should be enabled or not
+ *
+ *  @discussion By default logs are enabled.
+ *
+ *  @note If you don't want logs in production environment you should disable them within this flag.
+ */
++ (void)enableLogging:(BOOL)flag;
 
 /**
  *  Login to Quickblox REST and chat, group dialog join.
@@ -30,28 +58,15 @@ QMUsersServiceDelegate
  *  @param user       QBUUser for login.
  *  @param completion Completion block with a result.
  */
-- (void)logInWithUser:(QBUUser *)user completion:(void (^)(BOOL success, NSString *errorMessage))completion;
+- (void)logInWithUser:(QBUUser *)user completion:(nullable void(^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  *  Logouts from Quickblox REST and chat, clears dialogs and messages.
  *
  *  @param completion Completion block with a result.
  */
-- (void)logoutWithCompletion:(dispatch_block_t)completion;
-
-/**
- *  REST authentication service.
- */
-@property (nonatomic, readonly) QMAuthService* authService;
-
-/**
- *  Chat service.
- */
-@property (nonatomic, readonly) QMChatService* chatService;
-
-/**
- *  Users service.
- */
-@property (strong, nonatomic, readonly) QMUsersService* usersService;
+- (void)logoutWithCompletion:(nullable dispatch_block_t)completion;
 
 @end
+
+NS_ASSUME_NONNULL_END

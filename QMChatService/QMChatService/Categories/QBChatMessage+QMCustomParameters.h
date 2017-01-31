@@ -9,27 +9,31 @@
 #import <Quickblox/QBChatMessage.h>
 #import "QMChatTypes.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QBChatMessage (QMCustomParameters)
+
 /**
  *  Message
  */
-@property (strong, nonatomic) NSString *saveToHistory;
+@property (strong, nonatomic, nullable) NSString *saveToHistory;
 @property (assign, nonatomic) QMMessageType messageType;
-@property (strong, nonatomic) NSString *chatMessageID;
+@property (strong, nonatomic, nullable) NSString *chatMessageID;
 @property (assign, nonatomic) BOOL messageDeliveryStatus;
 @property (assign, nonatomic) QMMessageAttachmentStatus attachmentStatus;
+@property (assign, nonatomic) CLLocationCoordinate2D locationCoordinate;
 
 /**
  *  Dialog
  */
-@property (strong, nonatomic, readonly) QBChatDialog *dialog;
+@property (strong, nonatomic, readonly, nullable) QBChatDialog *dialog;
 @property (assign, nonatomic) QMDialogUpdateType dialogUpdateType;
-@property (strong, nonatomic) NSArray *currentOccupantsIDs;
-@property (strong, nonatomic) NSArray *addedOccupantsIDs;
-@property (strong, nonatomic) NSArray *deletedOccupantsIDs;
-@property (strong, nonatomic) NSString *dialogName;
-@property (strong, nonatomic) NSString *dialogPhoto;
-@property (strong, nonatomic) NSDate *dialogUpdatedAt;
+@property (strong, nonatomic, nullable) NSArray QB_GENERIC(NSNumber *) *currentOccupantsIDs;
+@property (strong, nonatomic, nullable) NSArray QB_GENERIC(NSNumber *) *addedOccupantsIDs;
+@property (strong, nonatomic, nullable) NSArray QB_GENERIC(NSNumber *) *deletedOccupantsIDs;
+@property (strong, nonatomic, nullable) NSString *dialogName;
+@property (strong, nonatomic, nullable) NSString *dialogPhoto;
+@property (strong, nonatomic, nullable) NSDate *dialogUpdatedAt;
 
 /**
  *  Save values from QBChatDialog to message custom parameters
@@ -60,4 +64,14 @@
  */
 - (BOOL)isNotificatonMessage;
 
+/**
+ *  This method is used to determine if the message data item is location.
+ *
+ *  @return A boolean value specifying whether or not this is a location message.
+ *  Return `YES` if this item is a location message, and `NO` if it is a text message.
+ */
+- (BOOL)isLocationMessage;
+
 @end
+
+NS_ASSUME_NONNULL_END

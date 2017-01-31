@@ -8,6 +8,8 @@
 
 #import "QMAuthService.h"
 
+#import "QMSLog.h"
+
 @implementation QMAuthService (Bolts)
 
 - (BFTask *)signUpAndLoginWithUser:(QBUUser *)user {
@@ -15,7 +17,7 @@
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
     
     [self signUpAndLoginWithUser:user completion:^(QBResponse *response, QBUUser *userProfile) {
-        //
+        
         response.success ? [source setResult:userProfile] : [source setError:response.error.error];
     }];
     
@@ -27,7 +29,7 @@
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
     
     [self logInWithUser:user completion:^(QBResponse *response, QBUUser *userProfile) {
-        //
+        
         response.success ? [source setResult:userProfile] : [source setError:response.error.error];
     }];
     
@@ -39,7 +41,7 @@
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
     
     [self loginWithTwitterDigitsAuthHeaders:authHeaders completion:^(QBResponse *response, QBUUser *userProfile) {
-        //
+        
         response.success ? [source setResult:userProfile] : [source setError:response.error.error];
     }];
     
@@ -51,7 +53,19 @@
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
     
     [self logInWithFacebookSessionToken:sessionToken completion:^(QBResponse *response, QBUUser *userProfile) {
-        //
+        
+        response.success ? [source setResult:userProfile] : [source setError:response.error.error];
+    }];
+    
+    return source.task;
+}
+
+- (BFTask *)loginWithTwitterAccessToken:(NSString *)accessToken accessTokenSecret:(NSString *)accessTokenSecret {
+    
+    BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
+    
+    [self loginWithTwitterAccessToken:accessToken accessTokenSecret:accessTokenSecret completion:^(QBResponse *response, QBUUser *userProfile) {
+        
         response.success ? [source setResult:userProfile] : [source setError:response.error.error];
     }];
     
@@ -63,7 +77,7 @@
     BFTaskCompletionSource* source = [BFTaskCompletionSource taskCompletionSource];
     
     [self logOut:^(QBResponse *response) {
-        //
+        
         response.success ? [source setResult:nil] : [source setError:response.error.error];
     }];
     

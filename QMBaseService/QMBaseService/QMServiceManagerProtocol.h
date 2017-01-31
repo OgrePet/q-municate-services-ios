@@ -7,10 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Quickblox/Quickblox.h>
 
 /**
  *  Main QMServices protocol.
  */
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol QMServiceManagerProtocol <NSObject>
 @required
@@ -20,7 +23,7 @@
  *
  *  @return QBUUser instance
  */
-- (QBUUser *)currentUser;
+- (nullable QBUUser *)currentUser;
 
 /**
  *  Check is current session is authorized
@@ -36,4 +39,10 @@
  */
 - (void)handleErrorResponse:(QBResponse *)response;
 
+@optional
+
+- (NSString *)appGroupIdentifier;
+
 @end
+
+NS_ASSUME_NONNULL_END

@@ -11,11 +11,16 @@
 #import <Quickblox/Quickblox.h>
 #import "QMDBStorage.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QMUsersCache : QMDBStorage
 
-+ (QMUsersCache *)instance;
++ (nullable QMUsersCache *)instance;
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName applicationGroupIdentifier:(NSString *)appGroupIdentifier;
 
 #pragma mark - Insert/Update/Delete users in cache
+
 /**
  *  Insert/Update user in cache
  *
@@ -23,6 +28,7 @@
  *  @param completion Completion block is called after update or insert operation is completed
  */
 - (BFTask *)insertOrUpdateUser:(QBUUser *)user;
+
 /**
  *  Insert/Update users in cache
  *
@@ -30,6 +36,7 @@
  *  @param completion Completion block is called after update or insert operation is completed
  */
 - (BFTask *)insertOrUpdateUsers:(NSArray QB_GENERIC(QBUUser *) *)users;
+
 /**
  *  Delete user from cahce
  *
@@ -37,6 +44,7 @@
  *  @param completion  Completion block that is called after the delete operation has completed.
  */
 - (BFTask *)deleteUser:(QBUUser *)user;
+
 /**
  *  Delete all users
  *
@@ -53,6 +61,7 @@
  *  @param completion Completion block that is called after the fetch has completed. Returns an instance of QBUUser
  */
 - (BFTask QB_GENERIC(QBUUser *) *)userWithPredicate:(NSPredicate *) predicate;
+
 /**
  *  Fetch users with sort attribute, sorted ascending
  *
@@ -61,6 +70,7 @@
  *  @param completion Completion block that is called after the fetch has completed. Returns an array of QBUUser instances
  */
 - (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)usersSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending;
+
 /**
  *  Fetch users with predicate, sort attribute, sorted ascending
  *
@@ -69,8 +79,10 @@
  *  @param ascending  `YES` if the attribute should be sorted ascending, `NO` for descending.
  *  @param completion Completion block that is called after the fetch has completed. Returns an array of QBUUser instances
  */
-- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)usersWithPredicate:(NSPredicate *)predicate
-                                            sortedBy:(NSString *)sortTerm
-                                           ascending:(BOOL)ascending;
+- (BFTask QB_GENERIC(NSArray QB_GENERIC(QBUUser *) *) *)usersWithPredicate:(nullable NSPredicate *)predicate
+                                                                  sortedBy:(NSString *)sortTerm
+                                                                 ascending:(BOOL)ascending;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -12,9 +12,11 @@
 #import "QMUsersMemoryStorage.h"
 #import "QBUUser+CustomData.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class QBGeneralResponsePage;
 
-typedef void(^QMCacheCollection)(NSArray *collection);
+typedef void(^QMCacheCollection)(NSArray * _Nullable collection);
 
 @protocol QMContactListServiceDelegate;
 @protocol QMContactListServiceCacheDataSource;
@@ -39,7 +41,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @return QMContactListService instance
  */
 - (instancetype)initWithServiceManager:(id<QMServiceManagerProtocol>)serviceManager
-                       cacheDataSource:(id<QMContactListServiceCacheDataSource>)cacheDataSource;
+                       cacheDataSource:(nullable id<QMContactListServiceCacheDataSource>)cacheDataSource;
 
 /**
  *  Add instance that confirms contact list service multicaste protocol
@@ -61,7 +63,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @param user       user which you would like to add to contact list
  *  @param completion completion block
  */
-- (void)addUserToContactListRequest:(QBUUser *)user completion:(void(^)(BOOL success))completion;
+- (void)addUserToContactListRequest:(QBUUser *)user completion:(nullable void(^)(BOOL success))completion;
 
 /**
  *  Remove user from contact list request
@@ -69,7 +71,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @param userID     user ID which you would like to remove from contact list
  *  @param completion completion block
  */
-- (void)removeUserFromContactListWithUserID:(NSUInteger)userID completion:(void(^)(BOOL success))completion;
+- (void)removeUserFromContactListWithUserID:(NSUInteger)userID completion:(nullable void(^)(BOOL success))completion;
 
 /**
  *  Accept contact request
@@ -77,7 +79,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @param userID     user ID from which you would like to accept contact request
  *  @param completion completion block
  */
-- (void)acceptContactRequest:(NSUInteger)userID completion:(void (^)(BOOL success))completion;
+- (void)acceptContactRequest:(NSUInteger)userID completion:(nullable void (^)(BOOL success))completion;
 
 /**
  *  Reject contact request
@@ -85,7 +87,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @param userID     user ID from which you would like to reject contact request
  *  @param completion completion block
  */
-- (void)rejectContactRequest:(NSUInteger)userID completion:(void(^)(BOOL success))completion;
+- (void)rejectContactRequest:(NSUInteger)userID completion:(nullable void(^)(BOOL success))completion;
 
 @end
 
@@ -156,7 +158,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *
  *  @param block Block for provide QBContactListItem collection
  */
-- (void)cachedContactListItems:(QMCacheCollection)block;
+- (void)cachedContactListItems:(nullable QMCacheCollection)block;
 
 @optional
 
@@ -190,7 +192,7 @@ typedef void(^QMCacheCollection)(NSArray *collection);
  *  @param isOnline online status for user
  *  @param status   custom status for user
  */
-- (void)contactListService:(QMContactListService *)contactListService didReceiveContactItemActivity:(NSUInteger)userID isOnline:(BOOL)isOnline status:(NSString *)status;
+- (void)contactListService:(QMContactListService *)contactListService didReceiveContactItemActivity:(NSUInteger)userID isOnline:(BOOL)isOnline status:(nullable NSString *)status;
 
 /**
  *  Is called when contact list service did recieve some contact add request from userID
@@ -201,3 +203,5 @@ typedef void(^QMCacheCollection)(NSArray *collection);
 
 
 @end
+
+NS_ASSUME_NONNULL_END

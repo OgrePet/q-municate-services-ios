@@ -1,4 +1,3 @@
-
 //
 //  QMBaseAuthService.m
 //  QMServices
@@ -9,7 +8,10 @@
 
 #import "QMAuthService.h"
 
-NSString *const kQMAuthSocialProvider = @"facebook";
+#import "QMSLog.h"
+
+static NSString *const kQMFacebookAuthSocialProvider = @"facebook";
+static NSString *const kQMTwitterAuthSocialProvider  = @"twitter";
 
 @interface QMAuthService()
 
@@ -22,7 +24,7 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 
 - (void)dealloc {
     
-    NSLog(@"%@ - %@",  NSStringFromSelector(_cmd), self);
+    QMSLog(@"%@ - %@",  NSStringFromSelector(_cmd), self);
 }
 
 #pragma  mark Add / Remove multicast delegate
@@ -34,7 +36,7 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 
 - (void)removeDelegate:(id <QMAuthServiceDelegate>)delegate {
     
-    [self.multicastDelegate addDelegate:delegate];
+    [self.multicastDelegate removeDelegate:delegate];
 }
 
 #pragma mark - Will Start
@@ -45,16 +47,15 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 }
 
 - (QBRequest *)logOut:(void(^)(QBResponse *response))completion {
-
+    
     __weak __typeof(self)weakSelf = self;
     
     weakSelf.isAuthorized = NO;
     QBRequest *request = [QBRequest logOutWithSuccessBlock:^(QBResponse *response) {
         //Notify subscribes about logout
         if ([weakSelf.multicastDelegate respondsToSelector:@selector(authServiceDidLogOut:)]) {
-            [weakSelf.multicastDelegate authServiceDidLogOut:self];
+            [weakSelf.multicastDelegate authServiceDidLogOut:weakSelf];
         }
-        
         
         if (completion) {
             completion(response);
@@ -75,7 +76,6 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 - (QBRequest *)signUpAndLoginWithUser:(QBUUser *)user completion:(void(^)(QBResponse *response, QBUUser *userProfile))completion {
     
     __weak __typeof(self)weakSelf = self;
-    
     //1. Signup
     QBRequest *request = [QBRequest signUp:user successBlock:^(QBResponse *response, QBUUser *newUser) {
         //2. Login
@@ -139,7 +139,7 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 - (QBRequest *)loginWithTwitterDigitsAuthHeaders:(NSDictionary *)authHeaders completion:(void(^)(QBResponse *response, QBUUser *userProfile))completion {
     
     __weak __typeof(self)weakSelf = self;
-    QBRequest *request = [QBRequest logInWithTwitterDigitsAuthHeaders:authHeaders successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
+    QBRequest *request = [QBRequest logInWithTwitterDigitsAuthHeaders:authHeaders successBlock:^(QBResponse *response, QBUUser *user) {
         __typeof(weakSelf)strongSelf = weakSelf;
         user.password = [QBSession currentSession].sessionDetails.token;
         strongSelf.isAuthorized = YES;
@@ -151,7 +151,7 @@ NSString *const kQMAuthSocialProvider = @"facebook";
         if (completion) {
             completion(response, user);
         }
-    } errorBlock:^(QBResponse * _Nonnull response) {
+    } errorBlock:^(QBResponse *response) {
         
         [weakSelf.serviceManager handleErrorResponse:response];
         
@@ -165,14 +165,49 @@ NSString *const kQMAuthSocialProvider = @"facebook";
 
 #pragma mark - Social auth
 
-- (QBRequest *)logInWithFacebookSessionToken:(NSString *)sessionToken completion:(void(^)(QBResponse *response, QBUUser *userProfile))completion {
+- (QBRequest *)loginWithTwitterAccessToken:(NSString *)accessToken accessTokenSecret:(NSString *)accessTokenSecret completion:(void(^)(QBResponse *response, QBUUser *userProfile))completion {
     
     __weak __typeof(self)weakSelf = self;
-    QBRequest *request = [QBRequest logInWithSocialProvider:kQMAuthSocialProvider accessToken:sessionToken accessTokenSecret:nil successBlock:^(QBResponse *response, QBUUser *tUser) {
+    
+    QBRequest *request = [QBRequest logInWithSocialProvider:kQMTwitterAuthSocialProvider
+                                                accessToken:accessToken accessTokenSecret:accessTokenSecret successBlock:^(QBResponse *response, QBUUser *tUser)
+    {
         //set password
         tUser.password = [QBSession currentSession].sessionDetails.token;
         
-        self.isAuthorized = YES;
+        weakSelf.isAuthorized = YES;
+        
+        if ([weakSelf.multicastDelegate respondsToSelector:@selector(authService:didLoginWithUser:)]) {
+            [weakSelf.multicastDelegate authService:weakSelf didLoginWithUser:tUser];
+        }
+        
+        if (completion) {
+            completion(response, tUser);
+        }
+        
+    } errorBlock:^(QBResponse *response) {
+        
+        [weakSelf.serviceManager handleErrorResponse:response];
+        
+        if (completion) {
+            completion(response, nil);
+        }
+    }];
+    
+    return request;
+}
+
+- (QBRequest *)logInWithFacebookSessionToken:(NSString *)sessionToken
+                                  completion:(void(^)(QBResponse *response, QBUUser *userProfile))completion {
+    
+    __weak __typeof(self)weakSelf = self;
+    QBRequest *request = [QBRequest logInWithSocialProvider:kQMFacebookAuthSocialProvider
+                                                accessToken:sessionToken
+                                          accessTokenSecret:nil successBlock:^(QBResponse *response, QBUUser *tUser) {
+        //set password
+        tUser.password = [QBSession currentSession].sessionDetails.token;
+        
+        weakSelf.isAuthorized = YES;
         
         if ([weakSelf.multicastDelegate respondsToSelector:@selector(authService:didLoginWithUser:)]) {
             [weakSelf.multicastDelegate authService:weakSelf didLoginWithUser:tUser];

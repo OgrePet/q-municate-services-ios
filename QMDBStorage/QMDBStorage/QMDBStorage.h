@@ -34,6 +34,7 @@
 
 + (void) registerQMCDRecordStackFactory: (id<QMCDRecordStackFactory>) stackFactory;
 
+
 - (instancetype)initWithStoreNamed:(NSString *)storeName
                              model:(NSManagedObjectModel *)model
                         queueLabel:(const char *)queueLabel;
@@ -42,6 +43,18 @@
                              model:(NSManagedObjectModel *)model
                      storePassword:(NSString*) storePassword
                         queueLabel:(const char *)queueLabel;
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                        queueLabel:(const char *)queueLabel
+        applicationGroupIdentifier:(NSString *)appGroupIdentifier;
+
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                     storePassword:(NSString*) storePassword
+                        queueLabel:(const char *)queueLabel
+        applicationGroupIdentifier:(NSString *)appGroupIdentifier;
 
 /**
  * @brief Load CoreData(Sqlite) file

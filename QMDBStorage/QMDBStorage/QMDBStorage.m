@@ -7,6 +7,7 @@
 //
 
 #import "QMDBStorage.h"
+#import "QMSLog.h"
 
 static id<QMCDRecordStackFactory> stackFactory = nil;
 
@@ -16,7 +17,7 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
 
 @property (strong, nonatomic) dispatch_queue_t queue;
 @property (strong, nonatomic) QMCDRecordStack *stack;
-@property (strong, nonatomic) NSManagedObjectContext *bgContex;
+@property (strong, nonatomic) NSManagedObjectContext *bgContext;
 
 @end
 
@@ -27,17 +28,48 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
     stackFactory = newStackFactory;
 }
 
-- (instancetype)initWithStoreNamed:(NSString *)storeName model:(NSManagedObjectModel *)model queueLabel:(const char *)queueLabel {
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                        queueLabel:(const char *)queueLabel {
+    
     return [self initWithStoreNamed: storeName
                               model: model
                       storePassword: nil
-                         queueLabel: queueLabel];
+                         queueLabel: queueLabel
+         applicationGroupIdentifier: nil];
 }
 
 - (instancetype)initWithStoreNamed:(NSString *)storeName
                              model:(NSManagedObjectModel *)model
                      storePassword:(NSString*) storePassword
                         queueLabel:(const char *)queueLabel {
+    
+    return [self initWithStoreNamed: storeName
+                              model: model
+                      storePassword: storePassword
+                         queueLabel: queueLabel
+         applicationGroupIdentifier: nil];
+}
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                        queueLabel:(const char *)queueLabel
+        applicationGroupIdentifier:(NSString *)appGroupIdentifier
+{
+    return [self initWithStoreNamed: storeName
+                              model: model
+                      storePassword: nil
+                         queueLabel: queueLabel
+         applicationGroupIdentifier: appGroupIdentifier];
+}
+
+
+- (instancetype)initWithStoreNamed:(NSString *)storeName
+                             model:(NSManagedObjectModel *)model
+                     storePassword:(NSString*) storePassword
+                        queueLabel:(const char *)queueLabel 
+	    applicationGroupIdentifier:(NSString *)appGroupIdentifier {
+
     self = [self init];
     if (self) {
         
@@ -48,11 +80,11 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
             self.stack = [stackFactory createStackWithStoreName: storeName storePassword: storePassword model: model];
         }
         else {
-            self.stack = [AutoMigratingQMCDRecordStack stackWithStoreNamed:storeName model:model];
+            self.stack = [AutoMigratingQMCDRecordStack stackWithStoreNamed:storeName model:model applicationGroupIdentifier:appGroupIdentifier];
         }
         [QMCDRecordStack setDefaultStack:self.stack];
     }
-    
+
     return self;
 }
 
@@ -68,8 +100,12 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
 
 + (void)cleanDBWithStoreName:(NSString *)name {
     
-    NSURL *storeUrl = [NSPersistentStore QM_fileURLForStoreName:name];
+    [self cleanDBWithStoreName:name applicationGroupIdentifier:nil];
+}
+
++ (void)cleanDBWithStoreName:(NSString *)name applicationGroupIdentifier:(NSString *)appGroupIdentifier {
     
+    NSURL *storeUrl = [NSPersistentStore QM_fileURLForStoreNameIfExistsOnDisk:name applicationGroupIdentifier:appGroupIdentifier];
     
     if (storeUrl) {
     
@@ -77,26 +113,29 @@ static id<QMCDRecordStackFactory> stackFactory = nil;
     }
 }
 
-- (NSManagedObjectContext *)bgContex {
+- (NSManagedObjectContext *)bgContext {
     
-    if (!_bgContex) {
-        _bgContex = [NSManagedObjectContext QM_confinementContextWithParent:self.stack.context];
+    if (!_bgContext) {
+        NSManagedObjectContext *context = [NSManagedObjectContext QM_context];
+        [context setParentContext:self.stack.context];
+        
+        _bgContext = context;
     }
     
-    return _bgContex;
+    return _bgContext;
 }
 
 - (void)async:(void(^)(NSManagedObjectContext *context))block {
     
     dispatch_async(self.queue, ^{
-        block(self.bgContex);
+        block(self.bgContext);
     });
 }
 
 - (void)sync:(void(^)(NSManagedObjectContext *context))block {
     
     dispatch_sync(self.queue, ^{
-        block(self.bgContex);
+        block(self.bgContext);
     });
 }
 

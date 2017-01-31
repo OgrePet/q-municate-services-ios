@@ -8,11 +8,11 @@
 
 Pod::Spec.new do |s|
   s.name         = "QMServicesDevelopment"
-  s.version      = "0.3.8"
+  s.version      = "0.4.6"
   s.summary      = "Easy-to-use services for Quickblox SDK, for speeding up development of iOS chat applications."
   s.homepage     = "https://github.com/QuickBlox/q-municate-services-ios"
   s.license      = { :type => 'BSD', :file => 'LICENSE.txt' }
-  s.author       = { "Andrey Ivanov" => "andrey.ivanov@quickblox.com" }
+  s.authors      = {"Andrey Ivanov" => "andrey.ivanov@quickblox.com", "Vitaliy Gorbachov" => "vitaliy.gorbachov@quickblox.com", "Vitaliy Gurkovsky" => "vitaliy.gurkovsky@injoit.com"}
   s.platform     = :ios, "7.0"
   s.source       = { :git => "https://github.com/QuickBlox/q-municate-services-ios.git", :tag => "#{s.version}"}
   s.source_files  = "**/*.{h,m}"
@@ -21,11 +21,11 @@ Pod::Spec.new do |s|
   s.ios.frameworks      = "MobileCoreServices", "SystemConfiguration", "AVFoundation", "CoreVideo", "Accelerate", "CoreMedia", "AudioToolbox", "CoreLocation", "CoreData", "CoreGraphics", "CFNetwork", "UIKit"
   s.libraries           = "resolv", "xml2", "stdc++", "z"
   s.xcconfig            = { 'HEADER_SEARCH_PATHS' => '/usr/include/libxml2', "FRAMEWORK_SEARCH_PATHS" => "$(PODS_ROOT)/../../Framework $(PODS_ROOT)/../External"}
-  s.prefix_header_contents = 
+  s.prefix_header_contents =
   '#import <Quickblox/Quickblox.h>
 #import <CoreData/CoreData.h>
 #import <Quickblox/QBMulticastDelegate.h>
 #import <Bolts/Bolts.h>'
   s.resource_bundle = {'QMChatCacheModel' => 'QMChatCache/QMChatCache/CoreData/QMChatServiceModel.xcdatamodeld', 'QMContactListCacheModel' => 'QMContactListCache/QMContactListCache/CoreData/QMContactListModel.xcdatamodeld', 'QMUsersCacheModel' => 'QMUsersCache/QMUsersCache/CoreData/QMUsersModel.xcdatamodeld'}
-  s.dependency "Bolts",  '1.5.0'
+  s.dependency "Bolts",  '>= 1.5.0'
 end

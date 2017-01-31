@@ -7,17 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Quickblox/QBMulticastDelegate.h>
+#import <Bolts/Bolts.h>
+
 #import "QMMemoryStorageProtocol.h"
 #import "QMServiceManagerProtocol.h"
+#import "QMDeferredQueueManager.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QMBaseService : NSObject <QMMemoryStorageProtocol>
 
 /**
  *  Service manager reference.
  */
-@property (weak, nonatomic, readonly) id <QMServiceManagerProtocol> serviceManager;
+@property (weak, nonatomic, readonly, nullable) id <QMServiceManagerProtocol> serviceManager;
+@property (strong, nonatomic, readonly) QMDeferredQueueManager *deferredQueueManager;
 
-- (id)init __attribute__((unavailable("init is not a supported initializer for this class.")));
+- (id)init NS_UNAVAILABLE;
 
 - (instancetype)initWithServiceManager:(id<QMServiceManagerProtocol>)serviceManager;
 
@@ -27,3 +34,5 @@
 - (void)serviceWillStart;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -10,6 +10,8 @@
 #import "QMCCModelIncludes.h"
 #import <Crashlytics/Crashlytics.h>
 
+#import "QMSLog.h"
+
 @implementation QMChatCache
 
 static QMChatCache *_chatCacheInstance = nil;
@@ -25,10 +27,17 @@ static QMChatCache *_chatCacheInstance = nil;
 #pragma mark - Configure store
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName {
-
-    NSManagedObjectModel *model = [NSManagedObjectModel QM_newModelNamed:@"QMChatServiceModel.momd" inBundleNamed:@"QMChatCacheModel.bundle"];
     
-    _chatCacheInstance = [[QMChatCache alloc] initWithStoreNamed:storeName model:model queueLabel:"com.qmunicate.QMChatCacheBackgroundQueue"];
+    [self setupDBWithStoreNamed:storeName applicationGroupIdentifier:nil];
+}
+
++ (void)setupDBWithStoreNamed:(NSString *)storeName applicationGroupIdentifier:(NSString *)appGroupIdentifier {
+    NSManagedObjectModel *model = [NSManagedObjectModel QM_newModelNamed:@"QMChatServiceModel.momd" inBundleNamed:@"QMChatCacheModel.bundle" fromClass:[self class]];
+    
+    _chatCacheInstance = [[QMChatCache alloc] initWithStoreNamed:storeName
+                                                           model:model
+                                                      queueLabel:"com.qmunicate.QMChatCacheBackgroundQueue"
+                                      applicationGroupIdentifier:appGroupIdentifier];
 }
 
 + (void)setupDBWithStoreNamed:(NSString *)storeName withPassword: (NSString*) storePassword
@@ -79,6 +88,17 @@ static QMChatCache *_chatCacheInstance = nil;
 
 #pragma mark Fetch Dialogs
 
+- (void)allDialogsWithCompletion:(nullable void(^)(NSArray QB_GENERIC(QBChatDialog *) * _Nullable dialogs))completion {
+    __weak __typeof(self)weakSelf = self;
+    
+    [self async:^(NSManagedObjectContext *context) {
+        NSArray *cdChatDialogs = [CDDialog QM_findAllInContext:context];
+        NSArray *allDialogs = [weakSelf convertCDDialogsTOQBChatDialogs:cdChatDialogs];
+        
+        DO_AT_MAIN(completion(allDialogs));
+
+    }];
+}
 - (void)dialogsSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending completion:(void(^)(NSArray *dialogs))completion {
     
     [self dialogsSortedBy:sortTerm ascending:ascending withPredicate:nil completion:completion];
@@ -87,7 +107,7 @@ static QMChatCache *_chatCacheInstance = nil;
 - (void)dialogByID:(NSString *)dialogID completion:(void (^)(QBChatDialog *cachedDialog))completion {
     __weak __typeof(self)weakSelf = self;
     [self async:^(NSManagedObjectContext *context) {
-        NSPredicate *fetchPredicate = [NSPredicate predicateWithFormat:@"(self.dialogID ==[cd] %@)",dialogID];
+        NSPredicate *fetchPredicate = [NSPredicate predicateWithFormat:@"(self.dialogID == [cd] %@)",dialogID];
         
         CDDialog *cdChatDialog = [CDDialog QM_findFirstWithPredicate:fetchPredicate inContext:context];
         if (cdChatDialog != nil) {
@@ -100,8 +120,7 @@ static QMChatCache *_chatCacheInstance = nil;
     }];
 }
 
-- (void)dialogsSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending withPredicate:(NSPredicate *)predicate
-             completion:(void(^)(NSArray *dialogs))completion {
+- (void)dialogsSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending withPredicate:(NSPredicate *)predicate completion:(void(^)(NSArray *dialogs))completion {
     
     __weak __typeof(self)weakSelf = self;
     
@@ -141,7 +160,7 @@ static QMChatCache *_chatCacheInstance = nil;
                 
                 QBChatDialog *tDialog = [cachedDialog toQBChatDialog];
                 
-                if (![dialog.updatedAt isEqual:tDialog.updatedAt] || dialog.unreadMessagesCount != tDialog.unreadMessagesCount) {
+                if (![dialog.updatedAt isEqualToDate:tDialog.updatedAt] || dialog.unreadMessagesCount != tDialog.unreadMessagesCount) {
                     
                     [toUpdate addObject:dialog];
                 }
@@ -166,8 +185,7 @@ static QMChatCache *_chatCacheInstance = nil;
             [weakSelf save:completion];
         }
         
-        NSLog(@"Dialogs to insert %lu", (unsigned long)toInsert.count);
-        NSLog(@"Dialogs to update %lu", (unsigned long)toUpdate.count);
+        QMSLog(@"[%@] Dialogs to insert %tu, update %tu", NSStringFromClass([self class]), toInsert.count, toUpdate.count);
     }];
 }
 
@@ -175,6 +193,7 @@ static QMChatCache *_chatCacheInstance = nil;
                 completion:(dispatch_block_t)completion {
 
     [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"deleting dialog from cache", @"dialogId" : dialogID}];
+    
     __weak __typeof(self)weakSelf = self;
     [self async:^(NSManagedObjectContext *context) {
         
@@ -185,7 +204,7 @@ static QMChatCache *_chatCacheInstance = nil;
     }];
 }
 
-- (void)deleteAllDialogs:(dispatch_block_t)completion {
+- (void)deleteAllDialogsWithCompletion:(dispatch_block_t)completion {
     
     [[Crashlytics sharedInstance] recordError:[NSError errorWithDomain:@"Log" code:42 userInfo:nil] withAdditionalUserInfo:@{@"Reason" : @"deleting all dialogs from cache"}];
     __weak __typeof(self)weakSelf = self;
@@ -255,7 +274,7 @@ static QMChatCache *_chatCacheInstance = nil;
 
 #pragma mark Fetch Messages
 
-- (void)messagesWithDialogId:(NSString *)dialogId sortedBy:(NSString *)sortTerm ascending:(BOOL)ascending completion:(void(^)(NSArray *array))completion {
+- (void)messagesWithDialogId:(NSString *)dialogId sortedBy:(NSString *)sortTerm ascending:(BOOL)ascending completion:(void(^)(NSArray *messages))completion {
     
     [self messagesWithPredicate:IS(@"dialogID", dialogId) sortedBy:sortTerm ascending:ascending completion:completion];
 }
@@ -369,17 +388,17 @@ static QMChatCache *_chatCacheInstance = nil;
             [weakSelf save:^{
                
                 if ([toInsert count] > 0) {
+                    
                     [weakSelf checkMessagesLimitForDialogWithID:dialogID withCompletion:completion];
-                } else {
+                }
+                else {
+                    
                     if (completion) completion();
                 }
-                
-                
             }];
         }
         
-        NSLog(@"Messages to insert %lu", (unsigned long)toInsert.count);
-        NSLog(@"Messages to update %lu", (unsigned long)toUpdate.count);
+        QMSLog(@"[%@] Messages to insert %tu, update %tu", NSStringFromClass([self class]), toInsert.count, toUpdate.count);
     }];
 }
 
@@ -472,7 +491,7 @@ static QMChatCache *_chatCacheInstance = nil;
     
 }
 
-- (void)deleteAllMessages:(dispatch_block_t)completion {
+- (void)deleteAllMessagesWithCompletion:(dispatch_block_t)completion {
     
     __weak __typeof(self)weakSelf = self;
     
