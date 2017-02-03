@@ -104,6 +104,12 @@
     
     [self.deferredQueueMemoryStorage removeMessage:message];
     [self.performingMessages removeObject:message.ID];
+    
+    if ([self.multicastDelegate respondsToSelector:@selector(deferredQueueManager:didRemoveMessageLocally:)]) {
+        
+        [self.multicastDelegate deferredQueueManager:self
+                             didRemoveMessageLocally:message];
+    }
 }
 
 - (QMMessageStatus)statusForMessage:(QBChatMessage *)message {
