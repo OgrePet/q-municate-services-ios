@@ -1102,6 +1102,15 @@ DEPRECATED_MSG_ATTRIBUTE("Deprecated in 0.3.3. Use 'sendNotificationMessageAbout
 - (void)chatService:(QMChatService *)chatService didDeleteChatDialogWithIDFromMemoryStorage:(NSString *)chatDialogID;
 
 /**
+ *  Is called when message did send
+ *
+ *  @param chatService instance
+ *  @param message sent QBChatMessage
+ *  @param dialogID message dialog ID
+ */
+- (void)chatService:(QMChatService *)chatService didSendMessage:(QBChatMessage *)message forDialog:(QBChatDialog *)dialog;
+
+/**
  *  Is called when message did add to memory storage for dialog with id
  *
  *  @param chatService instance
