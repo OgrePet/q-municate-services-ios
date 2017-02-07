@@ -1049,7 +1049,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                       completion:(nullable void(^)(QBResponse *response, NSArray QB_GENERIC(QBChatMessage *) * _Nullable messages))completion {
     
     dispatch_group_t messagesLoadGroup = dispatch_group_create();
-    if ([[self.messagesMemoryStorage messagesWithDialogID:chatDialogID] count] == 0) {
+    if ([self shouldLoadForChatWithDialogID:chatDialogID]) {
         
         // loading messages from cache
         dispatch_group_enter(messagesLoadGroup);
@@ -1234,6 +1234,19 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         }
         
     }];
+}
+
+- (BOOL)shouldLoadForChatWithDialogID:(NSString *)chatDialogID {
+    NSArray *storedMessages = [self.messagesMemoryStorage messagesWithDialogID:chatDialogID];
+    if (storedMessages.count > 0) {
+        for (QBChatMessage *storedMessage in storedMessages) {
+            if ([self.deferredQueueManager statusForMessage:storedMessage] == QMMessageStatusSent) {
+                return NO;
+            }
+        }
+    }
+    
+    return YES;
 }
 
 #pragma mark - Fetch dialogs
