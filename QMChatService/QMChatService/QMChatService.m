@@ -997,7 +997,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                       markAsRead:(BOOL)markAsRead
                       completion:(nullable void(^)(QBResponse *response, NSArray QB_GENERIC(QBChatMessage *) * _Nullable messages))completion {
     
-    [self messagesWithChatDialogID:chatDialogID extendedRequest:nil iterationBlock:nil completion:completion];
+    [self messagesWithChatDialogID:chatDialogID extendedRequest:nil markAsRead:markAsRead iterationBlock:nil completion:completion];
 }
 
 
@@ -1013,7 +1013,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                       markAsRead:(BOOL)markAsRead
                       completion:(nullable void(^)(QBResponse *response, NSArray QB_GENERIC(QBChatMessage *) * _Nullable messages))completion {
     
-    [self messagesWithChatDialogID:chatDialogID extendedRequest:extendedParameters iterationBlock:nil completion:completion];
+    [self messagesWithChatDialogID:chatDialogID extendedRequest:extendedParameters markAsRead:markAsRead iterationBlock:nil completion:completion];
 }
 
 
@@ -1029,7 +1029,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
                   iterationBlock:(nullable void(^)(QBResponse *response, NSArray * _Nullable messages, BOOL *stop))iterationBlock
                       completion:(nullable void(^)(QBResponse *response, NSArray QB_GENERIC(QBChatMessage *) * _Nullable messages))completion {
     
-    [self messagesWithChatDialogID:chatDialogID extendedRequest:nil iterationBlock:iterationBlock completion:completion];
+    [self messagesWithChatDialogID:chatDialogID extendedRequest:nil markAsRead:markAsRead iterationBlock:iterationBlock completion:completion];
 }
 
 
