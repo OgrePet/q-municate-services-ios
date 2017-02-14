@@ -64,7 +64,21 @@
     
     NSArray *messages = [self messagesWithDialogID:dialogID];
     
-    return [messages lastObject];
+    NSArray *localMessages = [self.delegate localMessagesForDialogWithID:dialogID];
+    
+    QBChatMessage* lastMessage = nil;
+    
+    for (int i = messages.count - 1; i >=0; i--) {
+        
+        QBChatMessage *message = messages[i];
+        if (![localMessages containsObject: message]) {
+            lastMessage = message;
+            break;
+        }
+        
+    }
+    
+    return lastMessage;
 }
 
 #pragma mark - replace
